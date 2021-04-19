@@ -1,0 +1,27 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars:
+    baseline_name: "MX_Sleds"
+    catalog_name: "Dell.com"
+    device_servicetags: ["F1SW673"] # Specify device service tag to limit by sled. Leave array empty [] to query sleds in chassis. 
+    chassis_filter: "" # Specify chassis service tag to limit devices on a single chassis. Leave blank to update all devices in chassis group.
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Check if host needs updated
+      dellemc.openmanage.ome_firmware_baseline_compliance_info:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        baseline_name: "{{ baseline_name }}"
+        #device_service_tags: "{{ device_servicetags }}"
+      register: check
+
+    - debug:
+        msg: "{{ (check.baseline_compliance_info | json_query(query) | first).ComplianceStatus }}"
+      vars:
+        query: "[?ServiceTag=='{{ item }}']"
+      loop: "{{ device_servicetags }}"

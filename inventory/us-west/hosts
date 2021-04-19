@@ -1,0 +1,22 @@
+
+
+[mx-chassis]
+MX7000-C38V9T2 oob_host=MX7000-C38V9T2 service_tag=C38V9T2
+
+[mx-sleds]
+MX840c-C39N9T2 oob_host=MX840c-C39N9T2 service_tag=C39N9T2
+MX740c-C39P9T2 oob_host=MX740c-C39P9T2 service_tag=C39P9T2
+MX740c-F1ST673 oob_host=MX740c-F1ST673 service_tag=F1ST673
+MX740c-F1SV673 oob_host=MX740c-F1SV673 service_tag=F1SV673
+MX740c-F1SX673 oob_host=MX740c-F1SX673 service_tag=F1SX673
+MX740c-F1SW673 oob_host=MX740c-F1SW673 service_tag=F1SW673
+
+[mx-iom]
+MX9116-C38S9T2 service_tag=C38S9T2
+MX9116-8PF8PK2 service_tag=8PF8PK2
+MX5108-C38T9T2 service_tag=C38T9T2
+
+[mx:children]
+mx-sleds
+mx-chassis
+mx-iom

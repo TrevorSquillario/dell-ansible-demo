@@ -1,0 +1,91 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars:
+    ansible_managed: "Created by Ansible on {{ '%Y-%m-%d %H:%M:%S' | strftime }}"
+    template_name: "002Test"
+    template_identity_pool: "mx840c Test"
+    device_servicetag: "F1SW673"
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Delete template
+      dellemc.openmanage.ome_template:
+        hostname:  "{{ hostname }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        command: "delete"
+        template_name: "{{ template_name }}"
+      tags:
+        - import
+
+    - name: Create template from device
+      dellemc.openmanage.ome_template:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        command: "create"
+        device_service_tag: "{{ device_servicetag }}"
+        attributes:
+          Name: "{{ template_name }}"
+          Description: "{{ ansible_managed }}"
+      register: output
+      tags:
+        - import
+
+    - debug: 
+        var: output
+
+    - name: Wait for template to be created
+      dellemc.openmanage.ome_template_info:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        template_id: "{{ output.return_id }}"
+      register: output_job
+      failed_when: output_job.template_info[hostname].Status == 2070
+      changed_when: output_job.template_info[hostname].Status == 2060
+      until: output_job.template_info[hostname].Status in [2060, 2070, 2090, 2100, 2101, 2102, 2103]
+      retries: 90 
+      delay: 10 # 15 Minutes
+      tags:
+        - import
+
+    - debug: 
+        var: output_job
+
+    - name: Assign VLANs to template 
+      dellemc.openmanage.ome_template_network_vlan:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        template_name: "{{ template_name }}"
+        nic_identifier: "NIC in Mezzanine 1A"
+        untagged_networks:
+          - port: 1
+            untagged_network_name: PGNet
+          - port: 2
+            untagged_network_name: PGNet
+        tagged_networks:
+          - port: 1
+            tagged_network_names:
+              - "VLAN 1002"
+              - "VLAN 1003"
+          - port: 2
+            tagged_network_names:
+              - "VLAN 1002"
+              - "VLAN 1003"
+      tags:
+        - vlan
+
+    - name: Attach identity pool to template
+      dellemc.openmanage.ome_template_identity_pool:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        template_name: "{{ template_name }}"
+        identity_pool_name: "{{ template_identity_pool }}"
+      tags:
+        - identity_pool

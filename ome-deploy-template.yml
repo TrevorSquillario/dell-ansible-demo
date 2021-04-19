@@ -1,0 +1,48 @@
+---
+- hosts: mx
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Deploy Template
+    dellemc.openmanage.ome_template:
+      hostname:  "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      command: "deploy"
+      template_name: "MX740c_New" 
+      device_service_tag:
+        - "{{ service_tag }}"
+      attributes:
+        NetworkBootIsoModel:
+          BootToNetwork: true
+          ShareType: "NFS"
+          IsoPath: "/mnt/data/iso/CentOS7-Unattended.iso"
+          IsoTimeout: 1 # Hour
+          ShareDetail:
+            IpAddress: "100.79.7.16"
+            ShareName: "iso"
+            User: ""
+            Password: ""
+    register: output_deploy
+
+  - debug:
+      var: output_deploy
+
+  - name: Wait on Deploy to Complete
+    dellemc.openmanage.ome_job_info:
+      hostname:  "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      job_id: "{{ output_deploy.return_id }}"
+    register: output_job
+    failed_when: output_job.job_info.LastRunStatus.Name == 'Failed'
+    changed_when: output_job.job_info.LastRunStatus.Name == 'Completed'
+    until: output_job.job_info.LastRunStatus.Name in ['Completed', 'Failed', 'Warning', 'Aborted', 'Paused', 'Stopped', 'Cancelled']
+    retries: 90 
+    delay: 10 # 15 Minutes
+
+  - debug:
+      var: output_job

@@ -1,0 +1,79 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars:
+    baseline_name: "MX_Sleds"
+    catalog_name: "Dell.com"
+    device_servicetags: ["F1SW673"] # Specify device service tag to limit by sled. Leave array empty [] to query sleds in chassis. 
+    chassis_filter: "" # Specify chassis service tag to limit devices on a single chassis. Leave blank to update all devices in chassis group.
+  vars_files:
+    - vault.yml
+  tasks:
+    - block:
+        - name: Get compute devices
+          dellemc.openmanage.ome_device_info:
+            hostname: "{{ default_ome_host }}"
+            username: "{{ vault_ome_username }}"
+            password: "{{ vault_ome_password }}"
+            fact_subset: "basic_inventory"
+            system_query_options:
+              filter: "Type eq 1000" # 1000 = Compute Device Type
+          register: output_device_info
+          
+        - name: Build a list of device service tags for chassis group
+          set_fact:
+            device_servicetags: "{{ device_servicetags }} + [ '{{ item.DeviceServiceTag }}' ]"
+          when: chassis_filter == ""
+          loop: "{{ output_device_info.device_info.value }}" 
+
+        - name: Build a list of device service tags for single chassis
+          set_fact:
+            device_servicetags: "{{ device_servicetags }} + [ '{{ item.DeviceServiceTag }}' ]"
+          vars:
+            query: "[?ChassisServiceTag=='{{ service_tag }}']" # Query string for json_query filter
+          when: chassis_filter != ""
+          loop: "{{ output_device_info.device_info.value | default([]) | json_query(query) }}" # Filter device list by the service tag of the chassis
+      when: device_servicetags | length == 0 # Don't run when specifing device_servicetags manually
+
+    - debug:
+        var: device_servicetags
+
+    - name: Create baseline for devices
+      dellemc.openmanage.ome_firmware_baseline:
+        hostname:  "{{ hostname }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        baseline_name: "{{ baseline_name }}"
+        catalog_name: "{{ catalog_name }}"
+        device_service_tags: "{{ device_servicetags }}"
+      ignore_errors: true # Fails if object exists https://github.com/dell/dellemc-openmanage-ansible-modules/issues/146
+
+    - name: Wait for baseline creation
+      pause:
+        seconds: 10
+
+    - name: Update firmware for all sleds using baseline
+      dellemc.openmanage.ome_firmware:
+        hostname:  "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        baseline_name: "{{ baseline_name }}"
+      notify: WaitForJob
+      register: output
+      ignore_errors: true # Fails if no updates required https://github.com/dell/dellemc-openmanage-ansible-modules/issues/252
+
+  handlers:
+    - name: WaitForJob
+      dellemc.openmanage.ome_job_info:
+        hostname:  "{{ hostname }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        job_id: "{{ output.update_status.Id }}"
+      register: output_job
+      failed_when: output_job.job_info.LastRunStatus.Name == 'Failed'
+      changed_when: output_job.job_info.LastRunStatus.Name == 'Completed'
+      until: output_job.job_info.LastRunStatus.Name in ['Completed', 'Failed', 'Warning', 'Aborted', 'Paused', 'Stopped', 'Cancelled']
+      retries: 90 
+      delay: 10 # 15 Minutes

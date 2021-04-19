@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    retries_count: 100
+    polling_interval: 10
+    #service_tag: "8RG6842"
+    service_tag: C38V9T2
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Get Chassis inventory
+    dellemc.openmanage.ome_device_info:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      fact_subset: "detailed_inventory"
+      system_query_options:
+        device_service_tag:
+          - "{{ service_tag }}"
+        inventory_type: "chassisSlotsList"
+    register: result_chassis
+
+  - set_fact:
+      sleds: "{{ result_chassis.device_info.device_service_tag[service_tag] | community.general.json_query('InventoryInfo[?Type==`2000`].SlotDeviceId') }}"
+
+  - name: Get sled inventory
+    dellemc.openmanage.ome_device_info:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      fact_subset: "detailed_inventory"
+      system_query_options:
+        device_id: "{{ sleds }}"
+        inventory_type: "deviceManagement"
+    register: result_sled
+
+  - set_fact:
+      sled_ips: "{{ result_sled.device_info.device_id | community.general.json_query('*.InventoryInfo[0].IpAddress') }}"
+
+  - debug:
+      var: sled_ips

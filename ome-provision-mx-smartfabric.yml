@@ -1,0 +1,149 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Setup SmartFabric
+  gather_facts: False
+  vars:
+    ansible_managed: "Created by Ansible on {{ '%Y-%m-%d %H:%M:%S' | strftime }}"
+    fabric_name: "SmartFabric01"
+    fabric_design: "2xMX9116n_Fabric_Switching_Engines_in_same_chassis"
+    primary_switch: "C38S9T2"
+    primary_switch_ports:
+      - ethernet1/1/41:1
+    secondary_switch: "8PF8PK2"
+    secondary_switch_ports:
+      - ethernet1/1/41:1
+    uplink_portgroup: "port-group1/1/13"
+    tagged_networks:
+      - name: "VLAN 1002"
+        description: "VLAN desc"
+        type: "General Purpose (Bronze)"
+        vlan_id: 1002
+      - name: "VLAN 1003"
+        description: "VLAN desc"
+        type: "General Purpose (Bronze)"
+        vlan_id: 1003
+      - name: "VLAN 1004"
+        description: "VLAN desc"
+        type: "General Purpose (Bronze)"
+        vlan_id: 1004
+      - name: "VLAN 1005"
+        description: "VLAN desc"
+        type: "General Purpose (Bronze)"
+        vlan_id: 1005
+    untagged_network: 
+  vars_files:
+    - vault.yml
+  tasks:
+#    - name: Create MCM Group
+#      ome_mcm_group: # The management module that is used for creating the MCM is the leader of the group
+#        hostname: "{{ default_ome_host }}"
+#        username: "{{ vault_ome_username }}"
+#        password: "{{ vault_ome_password }}"
+#        name: LabMX7000Group
+#        #backup_chassis: 
+#        #vip_ipv4_address: 
+#        #vip_subnet: 
+#        #vip_gateway: 
+#      tags: ['mcm']
+
+    - name: Create VLANs
+      dellemc.openmanage.ome_network_vlan:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        state: present
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        type: "{{ item.type }}"
+        vlan_minimum: "{{ item.vlan_id }}"
+        vlan_maximum: "{{ item.vlan_id }}"
+      loop: "{{ tagged_networks }}"
+      tags: ['vlan']
+
+    - name: "Create a smart fabric"
+      dellemc.openmanage.ome_smart_fabric:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        state: present
+        name: "{{ fabric_name }}"
+        description: "{{ ansible_managed }}"
+        fabric_design: "{{ fabric_design }}"
+        primary_switch_service_tag: "{{ primary_switch }}"
+        secondary_switch_service_tag: "{{ secondary_switch }}"
+        override_LLDP_configuration: "Enabled"
+      tags: ['smartfabric']
+
+#    - name: Set Port breakout configuration to default.
+#      dellemc.openmanage.ome_network_port_breakout:
+#        hostname: "{{ default_ome_host }}"
+#        username: "{{ vault_ome_username }}"
+#        password: "{{ vault_ome_password }}"
+#        target_port: "{{ item }}:{{ uplink_portgroup }}"
+#        breakout_type: "HardwareDefault"
+#      loop:
+#        - "{{ primary_switch }}"
+#        - "{{ secondary_switch }}"
+#      notify: WaitForJob
+#      register: output
+#      tags: ['breakout-default']
+
+    - name: Set Port breakout configuration.
+      dellemc.openmanage.ome_network_port_breakout:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        target_port: "{{ item }}:{{ uplink_portgroup }}"
+        breakout_type: "4X10GE" #"HardwareDefault" 
+      loop:
+        - "{{ primary_switch }}"
+        - "{{ secondary_switch }}"
+      notify: WaitForJob
+      register: output
+      tags: ['breakout']
+
+    - name: Create uplink
+      dellemc.openmanage.ome_smart_fabric_uplink:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        state: "present"
+        fabric_name: "{{ fabric_name }}"
+        name: "TOR_01"
+        description: "{{ ansible_managed }}"
+        uplink_type: "Ethernet"
+        ufd_enable: "Enabled"
+        primary_switch_service_tag: "{{ primary_switch }}"
+        primary_switch_ports: "{{ primary_switch_ports }}"
+        secondary_switch_service_tag: "{{ secondary_switch }}"
+        secondary_switch_ports: "{{ secondary_switch_ports }}"
+        tagged_networks: "{{ tagged_networks | map(attribute='name') | list }}"
+        untagged_network: "{{ untagged_network }}"
+      tags: ['uplink']
+      ignore_errors: True # Fails if object exists https://github.com/dell/dellemc-openmanage-ansible-modules/issues/253
+
+    - name: Create an identity pool using only ethernet settings.
+      dellemc.openmanage.ome_identity_pool:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        pool_name: "TestPool02"
+        pool_description: "{{ ansible_managed }}"
+        ethernet_settings:
+            starting_mac_address: "02:00:08:00:00:00"
+            identity_count: 200
+      tags: ['identitypool']
+
+  handlers:
+    - name: WaitForJob
+      dellemc.openmanage.ome_job_info:
+        hostname:  "{{ hostname }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        job_id: "{{ item.breakout_status.Id }}"
+      register: output_job
+      until: output_job.job_info.LastRunStatus.Name in ['Completed', 'Failed', 'Warning', 'Aborted', 'Paused', 'Stopped', 'Cancelled']
+      retries: 90 
+      delay: 10 # 15 Minutes
+      loop: "{{ output.results }}"

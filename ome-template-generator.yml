@@ -1,0 +1,47 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Import Template from Template
+  gather_facts: False
+  vars:
+    attributes:
+      BIOS.Setup.1-1:
+        BootMode: "Uefi"
+        AcPwrRcvry: "On" 
+        AcPwrRcvryDelay: "Random"
+      iDRAC.Embedded.1:
+        IPv4.1.DNSFromDHCP: "Enabled"
+        GUI.1.SecurityPolicyMessage: 'GCN OSE Lab'
+        Time.Timezone: 'America/Denver' 
+      System.Embedded.1: 
+        ServerPwr.1.PSRedPolicy: 1
+        ServerPwr.1.PSRapidOn: 0
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Import template from XML content
+      dellemc.openmanage.ome_template:
+        hostname:  "{{ hostname }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        command: "import"
+        attributes:
+          Name: "001Test"
+          Type: 2 # Template Type from /api/TemplateService/TemplateTypes
+          Content: "{{ lookup('template', './ome-template-generator.xml.j2') }}" # Lookup content from templated XML
+      register: output
+      tags:
+        - import
+
+    - name: Wait for template to be created
+      dellemc.openmanage.ome_template_info:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        template_id: "{{ output.return_id }}"
+      register: output_job
+      failed_when: output_job.template_info[hostname].Status == 2070
+      changed_when: output_job.template_info[hostname].Status == 2060
+      until: output_job.template_info[hostname].Status in [2060, 2070, 2090, 2100, 2101, 2102, 2103]
+      retries: 90 
+      delay: 10 # 15 Minutes

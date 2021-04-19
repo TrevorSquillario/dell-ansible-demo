@@ -1,0 +1,90 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars:
+    ansible_managed: "Created by Ansible on {{ '%Y-%m-%d %H:%M:%S' | strftime }}"
+  vars_files:
+    - vault.yml
+  roles:
+    - role: ome-alert-policy
+      vars:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        name: "TSTest"
+        description: "{{ ansible_managed }}"
+  tasks:
+    - name: Configure Network
+      dellemc.openmanage.ome_application_network_address:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        #management_vlan:
+        #  enable_vlan: true
+        #  vlan_id: 3344
+        dns_configuration:
+          use_dhcp_for_dns_domain_name: True
+          #dns_domain_name: "{{ dns_domain }}"
+          #register_with_dns: True
+          #dns_name: "{{ inventory_hostname }}" # Does not set Chassis Name
+        
+    - name: Configure NTP server for time synchronization.
+      dellemc.openmanage.ome_application_network_time:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        enable_ntp: true
+        time_zone: "TZ_ID_9" # Mountain
+        primary_ntp_address: "0.centos.pool.ntp.org"
+        secondary_ntp_address1: "1.centos.pool.ntp.org"
+
+    - name: Update session time out
+      dellemc.openmanage.ome_application_network_webserver:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        webserver_timeout: 120 # Minutes, this is the max for the MX7000
+      
+#    - name: Change password for root
+#      dellemc.openmanage.ome_user:
+#        hostname: "{{ default_ome_host }}"
+#        username: "{{ vault_ome_username }}"
+#        password: "{{ vault_ome_password }}"
+#        state: "present"
+#        attributes:
+#          UserName: "root"
+#          Password: "calvin"
+#          RoleId: "10" # Chassis Administrator
+#          Enabled: True
+
+    - name: Create user
+      dellemc.openmanage.ome_user:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        state: "present"
+        attributes:
+          UserName: "ansibletest"
+          Password: "P@ssw0rd!"
+          RoleId: "16" # Viewer
+          Enabled: True
+
+    - name: Configure Chassis
+      ome_chassis:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        name: "{{ inventory_hostname | upper }}"
+        chassis_service_tag: "{{ service_tag }}"
+        slot_names:
+          - slot: 1
+            name: Slot-1
+          - slot: 2
+            name: Slot-2
+          - slot: 3
+            name: Slot-3
+      register: chassis_out
+      tags:
+        - slots

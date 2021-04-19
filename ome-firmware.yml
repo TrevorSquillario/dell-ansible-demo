@@ -1,0 +1,65 @@
+---
+- hosts: mx
+  connection: local
+  name: Provision Host
+  gather_facts: False
+  vars:
+    catalog_name: "SledLatest"
+    baseline_name: "TestSledLatest"
+  vars_files:
+    - ../vault.yml
+  tasks:
+  - name: Create catalog from NFS network share
+    dellemc.openmanage.ome_firmware_catalog:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      catalog_name: "{{ catalog_name }}"
+      repository_type: "NFS"
+      source: "192.166.0.2"
+      source_path: "/nfs/R940"
+      file_name: "catalog.xml"
+
+  - name: Create baseline 
+    dellemc.openmanage.ome_firmware_baseline:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      baseline_name: "{{ baseline_name }}"
+      catalog_name: "{{ catalog_name }}"
+      device_service_tags:
+        - "SVCTAG1"
+        - "SVCTAG2"
+
+  - name: Retrieves device compliance report 
+    dellemc.openmanage.ome_firmware_baseline_compliance_info:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      baseline_name: "{{ baseline_name }}"
+
+  - name: Update firmware using baseline
+    dellemc.openmanage.ome_firmware:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      baseline_name: "{{ baseline_name }}"
+    register: output
+
+  - debug:
+      var: output
+
+  - name: Wait on Deploy to Complete
+    dellemc.openmanage.ome_job_info:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      job_id: "{{ output.return_id }}"
+      #job_id: 59355
+    register: output_job
+    until: output_job.job_info.LastRunStatus.Name in ['Completed', 'Failed', 'Warning', 'Aborted', 'Paused', 'Stopped', 'Cancelled']
+    retries: 90 
+    delay: 10 # 15 Minutes
+
+  - debug:
+      var: output_job

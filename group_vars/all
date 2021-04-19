@@ -1,0 +1,4 @@
+ProcVirtualization: "Enabled"
+BootMode: "Bios"
+LogicalProc: "Enabled"
+SysProfile: "PerfOptimized"

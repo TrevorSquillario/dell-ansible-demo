@@ -1,0 +1,40 @@
+---
+- hosts: mx
+  connection: local
+  name: Get Device Inventory by Service Tag
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Get device id by service tag
+      dellemc.openmanage.ome_device_info:
+        hostname:  "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        fact_subset: "basic_inventory"
+        system_query_options:
+          filter: "DeviceServiceTag eq '{{ service_tag }}'"
+      register: output
+
+    - set_fact:
+        device_id: "{{ output.device_info.value[0].Id }}"
+        cacheable: yes
+
+#    - copy:
+#        content: "{{ output }}"
+#        dest: "/tmp/dellemc.openmanage.ome_device_info_{{inventory_hostname}}.txt"
+
+    - name: Get detailed hardware inventory 
+      dellemc.openmanage.ome_device_info:
+        hostname:  "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        fact_subset: "detailed_inventory"
+        system_query_options:
+          device_service_tag:
+            - "{{ service_tag }}"
+          inventory_type: deviceFru
+      register: deviceinfo
+
+    - debug:
+        var: deviceinfo

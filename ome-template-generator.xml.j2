@@ -1,0 +1,9 @@
+<SystemConfiguration>
+{% for component, value in attributes.iteritems() %}
+    <Component FQDD="{{ component }}">
+    {% for attribute, attribute_value in value.iteritems() %}
+        <Attribute Name="{{ attribute }}">{{ attribute_value }}</Attribute>
+    {% endfor %}
+    </Component>
+{% endfor %}
+</SystemConfiguration>

@@ -1,0 +1,22 @@
+---
+- hosts: mx-iom
+  connection: local
+  name: Setup Sleds
+  gather_facts: False
+  vars:
+    update_firmware: False
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Configure Chassis IOM
+      ome_chassis_iom:
+        hostname: "{{ default_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        name: "{{ inventory_hostname | upper }}"
+        #root_password: "admin"
+        device_service_tag: "{{ service_tag }}"
+        ipv4_dhcp_enable: False
+        ipv6_enable: False
+        ipv6_dhcp_enable: true
+        snmp_community_string: "public"

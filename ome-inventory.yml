@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    retries_count: 100
+    polling_interval: 10
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Get Hardware inventory
+    dellemc.openmanage.ome_device_info:
+      hostname: "{{ default_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      fact_subset: "detailed_inventory"
+      system_query_options:
+        device_service_tag:
+          - C38V9T2
+        inventory_type: "chassisSlotsList"
+    register: deviceinfo
+
+  - debug:
+      var: deviceinfo
