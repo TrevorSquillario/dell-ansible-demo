@@ -1,20 +1,20 @@
 
 
 [mx-chassis]
-MX7000-01 oob_host=MX7000-C38V9T2 service_tag=C38V9T2
+MX7000-01 oob_host=MX7000-C38ZZZZ service_tag=C38ZZZZ
 
 [mx-sleds]
-MX840c-01 oob_host=MX840c-C39N9T2 service_tag=C39N9T2
-MX740c-02 oob_host=MX740c-C39P9T2 service_tag=C39P9T2
-MX740c-03 oob_host=MX740c-F1ST673 service_tag=F1ST673
-MX740c-04 oob_host=MX740c-F1SV673 service_tag=F1SV673
-MX740c-05 oob_host=MX740c-F1SX673 service_tag=F1SX673
-MX740c-06 oob_host=MX740c-F1SW673 service_tag=F1SW673
+MX840c-01 oob_host=MX840c-01-DRAC service_tag=C39ZZZZ
+MX740c-02 oob_host=MX740c-02-DRAC service_tag=C39ZZZZ
+MX740c-03 oob_host=MX740c-03-DRAC service_tag=F1SZZZZ
+MX740c-04 oob_host=MX740c-04-DRAC service_tag=F1SZZZZ
+MX740c-05 oob_host=MX740c-05-DRAC service_tag=F1SZZZZ
+MX740c-06 oob_host=MX740c-06-DRAC service_tag=F1SZZZZ
 
 [mx-iom]
-MX9116-C38S9T2 service_tag=C38S9T2
-MX9116-8PF8PK2 service_tag=8PF8PK2
-MX5108-C38T9T2 service_tag=C38T9T2
+MX9116-C38S9T2 service_tag=C38ZZZZ
+MX9116-8PF8PK2 service_tag=8PFZZZZ
+MX5108-C38T9T2 service_tag=C38ZZZZ
 
 [mx:children]
 mx-sleds

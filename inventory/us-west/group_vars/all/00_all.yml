@@ -1,2 +1,2 @@
-default_ome_host: "{{ vault_ome_host }}"
+default_ome_host: mx7000-chassis.example.com
 oob_type: idrac
