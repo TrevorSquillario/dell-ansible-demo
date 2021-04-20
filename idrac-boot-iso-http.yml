@@ -1,0 +1,76 @@
+---
+- name: Deploy Iso
+  connection: local
+  gather_facts: false
+  hosts: all
+  vars_files:
+    - vault.yml
+  vars:
+    http_share: "http://192.168.1.74/iso"
+    iso_file: "ubuntu-18.04.3-live-server-amd64.iso"
+  tasks:
+    - name: Get virtual media
+      community.general.redfish_info:
+        baseuri: "{{ oob_host }}"
+        username: "{{ vault_oob_username }}"
+        password: "{{ vault_oob_password }}"
+        category: "Manager"
+        command: "GetVirtualMedia"
+      register: result
+      tags:
+        - info
+  
+    - name: Insert virtual media
+      community.general.redfish_command:
+        baseuri: "{{ oob_host }}"
+        username: "{{ vault_oob_username }}"
+        password: "{{ vault_oob_password }}"
+        category: "Manager"
+        command: "VirtualMediaInsert"
+        resource_id: "iDRAC.Embedded.1"
+        virtual_media:
+          image_url: "{{ http_share }}/{{ iso_file }}"
+          media_types:
+            - CD
+            - DVD
+      register: result
+  
+    - name: Set one-time boot to CD
+      community.general.idrac_redfish_config:
+        category: Manager
+        command: SetManagerAttributes
+        resource_id: iDRAC.Embedded.1
+        manager_attributes:
+          ServerBoot.1.FirstBootDevice: "VCD-DVD"
+        baseuri: "{{ oob_host }}"
+        username: "{{ vault_oob_username }}"
+        password: "{{ vault_oob_password }}"
+
+
+    - name: Restart server
+      community.general.redfish_command:
+        baseuri: "{{ oob_host }}"
+        username: "{{ vault_oob_username }}"
+        password: "{{ vault_oob_password }}"
+        category: "Systems"
+        command: "PowerGracefulRestart"
+        resource_id: "System.Embedded.1"
+      register: result
+  
+    - name: wait for 10 min for OS deployment to finish
+      ansible.builtin.wait_for:
+        timeout: 600
+      delegate_to: localhost
+  
+    - name: Eject virtual media
+      community.general.redfish_command:
+        baseuri: "{{ oob_host }}"
+        username: "{{ vault_oob_username }}"
+        password: "{{ vault_oob_password }}"
+        category: "Manager"
+        command: "VirtualMediaEject"
+        virtual_media:
+          image_url: "{{ http_share }}/{{ iso_file }}"
+      tags:
+        - eject
+

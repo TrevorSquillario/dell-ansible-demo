@@ -1,0 +1,21 @@
+
+- hosts: all
+  gather_facts: False
+  connection: local
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Get facts
+      dellemc.openmanage.idrac_system_info: 
+        idrac_ip: "{{ oob_host }}"
+        idrac_user: "{{ vault_oob_username }}"
+        idrac_password: "{{ vault_oob_password }}"
+      register: output
+
+    - copy:
+        content: "{{ output }}"
+        dest: /tmp/idrac-device-info.json
+
+    - name: Print Disk Types
+      debug:
+        msg: "{{ output.system_info | json_query('PhysicalDisk[].MediaType') }}"

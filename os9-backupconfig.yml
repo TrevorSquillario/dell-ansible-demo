@@ -1,0 +1,12 @@
+- hosts: switches
+  connection: network_cli
+  vars:
+    ansible_ssh_pass: "{{ vault_oob_password }}"
+  vars_files:
+    - vault.yml
+  tasks:
+    - dellos9_config:
+        backup: True
+        backup_options: 
+          dir_path: /tmp/
+          filename: "{{ inventory_hostname }}_backup.txt"

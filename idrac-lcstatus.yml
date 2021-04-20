@@ -1,0 +1,20 @@
+---
+- hosts: all
+  connection: local
+  name: LC Status
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Get LC Status
+    dellemc.openmanage.idrac_lifecycle_controller_status_info:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+    register: out
+    until: out.msg.LCReady == true
+    retries: 900 
+    delay: 60
+
+  - debug:
+      var: out

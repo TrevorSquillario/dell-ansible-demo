@@ -1,0 +1,21 @@
+---
+- hosts: all
+  connection: local
+  name: Boot to Network ISO
+  gather_facts: False
+  vars:
+    share_host: "{{ vault_share_host }}"
+    nfs_share: "{{ share_host }}:/mnt/data/iso"
+    iso_file: "ubuntu-18.04.3-live-server-amd64.iso"
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Boot to Network ISO
+    dellemc.openmanage.idrac_os_deployment:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ nfs_share }}"
+      iso_image: "{{ iso_file }}"
+      expose_duration: 15 # Minutes
+    

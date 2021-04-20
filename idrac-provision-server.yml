@@ -1,0 +1,54 @@
+---
+- hosts: all
+  connection: local
+  name: Provision Server
+  gather_facts: False
+  vars:
+    share_host: "{{ vault_share_host }}"
+    share_config: "{{ share_host }}:/mnt/data/config"
+    scp_file: "R740.xml"
+    share_drm: "{{ share_host }}:/mnt/data/drm/MX"
+    catalog_name: "R640_1.01_Catalog.xml"
+    share_iso: "{{ share_host }}:/mnt/data/iso"
+    iso_image: "CentOS7-Unattended.iso" 
+    reboot: False
+    job_wait: True
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Power On Server
+    dellemc.openmanage.redfish_powerstate:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      reset_type: "On"
+
+  - name: Import Template
+    dellemc.openmanage.idrac_server_config_profile:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ share_drm }}"
+      command: "import"
+      scp_file: "{{ scp_file }}"
+      scp_components: "ALL"
+      shutdown_type: "Graceful"
+      job_wait: "{{ job_wait }}"
+
+  - name: Update Firmware
+    dellemc.openmanage.idrac_firmware:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ share_iso }}"
+      catalog_file_name: "{{ catalog_name }}"
+      reboot: "{{ reboot }}"
+      job_wait: "{{ job_wait }}"
+
+  - name: Boot to Network ISO
+    dellemc.openmanage.idrac_os_deployment:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ share_name }}"
+      iso_image: "{{ iso_image }}"

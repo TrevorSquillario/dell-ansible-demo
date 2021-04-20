@@ -22,7 +22,7 @@
           IsoPath: "/mnt/data/iso/CentOS7-Unattended.iso"
           IsoTimeout: 1 # Hour
           ShareDetail:
-            IpAddress: "100.79.7.16"
+            IpAddress: "{{ vault_share_host }}"
             ShareName: "iso"
             User: ""
             Password: ""

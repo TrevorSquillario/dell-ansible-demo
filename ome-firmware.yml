@@ -7,7 +7,7 @@
     catalog_name: "SledLatest"
     baseline_name: "TestSledLatest"
   vars_files:
-    - ../vault.yml
+    - vault.yml
   tasks:
   - name: Create catalog from NFS network share
     dellemc.openmanage.ome_firmware_catalog:

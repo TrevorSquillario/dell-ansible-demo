@@ -1,0 +1,62 @@
+---
+- name: Set Attributes
+  hosts: all
+  connection: local
+  gather_facts: False
+  vars:
+    bios_attributes:
+      BootMode: "Bios" 
+      AcPwrRcvry: "On" 
+      AcPwrRcvryDelay: "Random"
+    idrac_attributes:
+      #NIC.1.DNSRacName: "TSTest"
+      NIC.1.DNSDomainName: "gcnose.adc.delllabs.net"
+      IPv4.1.DNS1: "192.168.1.100"
+      IPv4.1.DNS2: "192.168.1.101"
+      #NTPConfigGroup.1.NTP1: 0.north-america.pool.ntp.org
+      #NTPConfigGroup.1.NTP2: 1.north-america.pool.ntp.org
+      #NTPConfigGroup.1.NTP3: 2.north-america.pool.ntp.org
+      #NTPConfigGroup.1.NTPEnable: Enabled
+      #NTPConfigGroup.1.NTPMaxDist: 16
+      #Time.1.Timezone: 'America/Denver'
+      GUI.1.SecurityPolicyMessage: 'GCN OSE Lab'
+      #SNMPAlert.1.Destination: 192.168.1.102
+      #SNMPAlert.1.State: Enabled
+    system_attributes: # Not implemented
+      ServerPwr.1.PSRedPolicy: 1
+      ServerPwr.1.PSRapidOn: 0
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Set BIOS Attributes 
+    community.general.redfish_config:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      category: Systems
+      command: SetBiosAttributes
+      bios_attribute_name: "{{ item.key }}"
+      bios_attribute_value: "{{ item.value }}"
+    with_items: "{{ bios_attributes | dict2items }}"
+    
+  - name: Set iDRAC Attributes
+    community.general.idrac_redfish_config:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      category: Manager
+      command: SetManagerAttributes
+      manager_attribute_name: "{{ item.key }}"
+      manager_attribute_value: "{{ item.value }}"
+    loop: "{{ idrac_attributes | dict2items }}"
+
+  - name: Set System Attributes
+    community.general.idrac_redfish_config:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      category: Manager
+      command: SetSystemAttributes
+      system_attribute_name: "{{ item.key }}"
+      system_attribute_value: "{{ item.value }}"
+    loop: "{{ system_attributes | dict2items }}"

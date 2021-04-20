@@ -1,4 +1,6 @@
 collections:
-  - name: dellemc.openmanage
   - name: community.vmware
   - name: community.general
+  - name: dellemc.openmanage
+  - name: dellemc.os9
+  - name: dellemc.os10

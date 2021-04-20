@@ -1,0 +1,15 @@
+- hosts: switches
+  connection: network_cli
+  gather_facts: no
+  tasks:
+    - name: "Get Dell EMC Show version"
+      dellos10_command:
+        commands: ['show version']
+      register: show_ver
+
+    - debug: 
+        var: show_ver
+
+    - name: "Backup Running Config"
+      dellos10_command:
+        commands: ['copy running-configuration scp://root:calvin@192.168.1.102/mnt/data/mx9116_backup.txt']

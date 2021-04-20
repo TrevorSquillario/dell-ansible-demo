@@ -1,0 +1,15 @@
+- hosts: switches
+  connection: network_cli
+  gather_facts: no
+  become: yes
+  vars_files:
+    - vault.yml
+  vars:
+  roles:
+    - role: dellos-users
+      dellos_users:
+        - username: "{{ vault_oseadmin_username }}"
+          password: "{{ vault_oseadmin_password }}"
+          role: sysadmin
+          privilege: 0
+          state: present

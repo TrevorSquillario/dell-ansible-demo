@@ -72,7 +72,7 @@
           Enabled: True
 
     - name: Configure Chassis
-      ome_chassis:
+      ome_chassis: # Official module not released yet, using version from local /library 
         hostname: "{{ default_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"

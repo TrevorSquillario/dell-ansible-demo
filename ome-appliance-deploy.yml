@@ -3,9 +3,14 @@
 ###
 
 - name: Deploy OME Appliance 
-  hosts: localhost
+  hosts: all
   connection: local
   gather_facts: False
+  vars:
+    datacenter: "DC01"
+    datastore: "Datastore01"
+    resource_pool: "RP01"
+    folder: "Folder01"
   vars_files:
     - vault.yml
   tasks:
@@ -15,13 +20,13 @@
       password: "{{ vault_vcenter_password }}"
       validate_certs: no
       ovf: /mnt/iso/openmanage_enterprise_ovf_format_3.5/vmx/ovf/openmanage_enterprise.x86_64-0.0.1.ovf
-      name: "TS_OpenManage01"
-      datacenter: "OSE Commercial DC"
-      #cluster: "R730-RN-vSAN" # Leave this out if you want to use a Resource Pool
-      resource_pool: "Trevor Squillario"
-      networks: {"bridged": "vDs-Ent_Sandbox-1100"}  
-      datastore: "CML2-VMwareProd-R730"
-      folder: "/OSE Commercial DC/vm/Individual VMs/Trevor Squillario"
+      name: "OpenManage01"
+      datacenter: "{{ datacenter }}"
+      #cluster: "" # Comment this out if you want to use a Resource Pool
+      resource_pool: "{{ resource_pool }}"
+      networks: {"bridged": "VM Network"}  
+      datastore: "{{ datastore }}"
+      folder: "/{{ datacenter }}/vm/{{ folder }}"
     register: out1
 
   - debug: 

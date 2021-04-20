@@ -1,0 +1,7 @@
+<SystemConfiguration>
+{% for device in pxe_devices %}
+    <Component FQDD="{{ device }}">
+        <Attribute Name="LegacyBootProto">PXE</Attribute>
+    </Component>
+{% endfor %}
+</SystemConfiguration>

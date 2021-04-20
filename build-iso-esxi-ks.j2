@@ -1,0 +1,72 @@
+# Accept the VMware End User License Agreement
+vmaccepteula
+
+ 
+
+# Clear paritions on all disks:$1$vm3yxqCM$pInvv/2VPS2wmDVYaWzbH1
+#clearpart --alldrives --overwritevmfs
+install --firstdisk --overwritevmfs --novmfsondisk
+
+
+# Configure root password
+rootpw {{ esxi_password }}
+
+ 
+
+# Configure network settings:
+network --bootproto=static --device=vmnic2 --ip={{ iplist.json.address }} --netmask={{ netmask }} --gateway={{ gateway }}  --hostname={{ item.fqdn }} --nameserver={{ dns }} --addvmportgroup=1
+
+ 
+
+
+reboot
+
+ 
+
+# First boot (not used with UEFI Secure Boot):
+%firstboot --interpreter=busybox
+
+ 
+
+# enable & start SSH
+vim-cmd hostsvc/enable_ssh
+vim-cmd hostsvc/start_ssh
+
+ 
+
+# enable & start ESXi Shell
+vim-cmd hostsvc/enable_esx_shell
+vim-cmd hostsvc/start_esx_shell
+
+ 
+
+# Suppress ESXi Shell warning and timeout
+esxcli system settings advanced set -o /UserVars/SuppressShellWarning -i 1
+esxcli system settings advanced set -o /UserVars/ESXiShellTimeOut -i 1
+
+ 
+
+# Configure NTP:
+cat > /etc/ntp.conf << ___EOF_NTP_CFG___
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict -6 ::1
+driftfile /etc/ntp.drift
+server 0.pool.ntp.org
+server 1.pool.ntp.org
+___EOF_NTP_CFG___
+
+ 
+
+# Start and enable the NTP service:
+/sbin/chkconfig --level 345 ntpd on
+/etc/init.d/ntpd start
+esxcli network firewall ruleset set --ruleset-id ntpClient --enabled yes
+
+ 
+
+sleep 30
+
+ 
+
+reboot

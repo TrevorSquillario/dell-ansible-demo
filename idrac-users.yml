@@ -1,0 +1,34 @@
+---
+- hosts: all
+  connection: local
+  name: Provision Server
+  gather_facts: False
+  vars:
+    idrac_users:
+      - username: "qcadmin"
+        password: "qcpass"
+        role: "Administrator"
+        ipmirole: "Administrator"
+  vars_files:
+    - vault.yml
+    
+  tasks:
+  - name: Create iDRAC Users
+    dellemc.openmanage.dellemc_configure_idrac_users:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "/tmp"
+      state: "present"
+      user_name: "{{ item.username }}"
+      user_password: "{{ item.password }}"
+      privilege_users: "{{ item.role }}"
+      ipmilanprivilege_users: "{{ item.ipmirole }}"
+      ipmiserialprivilege_users: "{{ item.ipmirole }}"
+      enable_users: 'Enabled'
+      solenable_users: 'Enabled'
+      protocolenable_users: 'Enabled'
+      privacyprotocol_users: 'DES'
+      authenticationprotocol_users: 'MD5'
+    with_items: "{{ idrac_users }}"
+    #no_log: Yes

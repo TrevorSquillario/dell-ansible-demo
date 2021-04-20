@@ -1,0 +1,22 @@
+---
+- name: Create Test Redfish Subscription
+  hosts: all
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Redfish Subscription
+      idrac_redfish_subscription: # Official module not released yet, using version from local /library 
+        baseuri: "{{ oob_host }}"
+        username: "{{ oob_user }}"
+        password: "{{ oob_password }}"
+        destination: "{{ item.destination }}"
+        type: "{{ item.type }}"
+        state: "present"
+      loop:
+        - type: "metric"
+          destination: "https://192.168.1.105:8188"
+        - type: "alert"
+          destination: "https://192.168.1.105:8189"
+

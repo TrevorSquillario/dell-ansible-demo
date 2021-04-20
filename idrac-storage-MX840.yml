@@ -1,0 +1,26 @@
+---
+- hosts: all
+  connection: local
+  name: Get Storage Info
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  tasks:        
+  - name: Create single volume MX840
+    dellemc.openmanage.dellemc_idrac_storage_volume:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      state: "create"
+      controller_id: "RAID.Mezzanine.1C-1"
+      volumes:
+        - name: "Data01"
+          drives: 
+            id: ["Disk.Bay.0:Enclosure.Modular.4:RAID.Mezzanine.1C-1","Disk.Bay.1:Enclosure.Modular.4:RAID.Mezzanine.1C-1","Disk.Bay.2:Enclosure.Modular.4:RAID.Mezzanine.1C-1","Disk.Bay.3:Enclosure.Modular.4:RAID.Mezzanine.1C-1"]
+          volume_type: "RAID 5"
+          span_length: 4
+          span_depth: 1
+          disk_cache_policy: "Enabled"
+          write_cache_policy: "WriteBack"
+          read_cache_policy: "AdaptiveReadAhead"
+          raid_init_operation: "Fast"

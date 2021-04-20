@@ -1,0 +1,27 @@
+---
+- hosts: all
+  connection: local
+  name: Provision Server
+  gather_facts: False
+  vars:
+    idrac_users:
+      - id: 5
+        username: "qcadmin"
+        password: "qcpass"
+        role: "Administrator"
+  vars_files:
+    - vault.yml
+
+  tasks:
+  - name: Create iDRAC Users
+    community.general.redfish_command:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      category: Accounts
+      command: AddUser,EnableUser
+      id: "{{ item.id }}"
+      new_username: "{{ item.username }}"
+      new_password: "{{ item.password }}"
+      roleid: "{{ item.role }}"
+    with_items: "{{ idrac_users }}"

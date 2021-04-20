@@ -1,0 +1,40 @@
+- hosts: switches
+  connection: network_cli
+  gather_facts: no
+  become: yes
+  vars_files:
+    - vault.yml
+  vars:
+  roles:
+    - role: dellos-vlan
+      dellos_vlan:
+        default_vlan: true
+        vlan1000:
+          name: "VM Network"
+          description: "Int-vlan"
+          tagged_members:
+            - port: fortyGigE 1/30
+              state: absent
+          untagged_members:
+            - port: fortyGigE 1/14
+              state: present
+          state: present
+    - role: dellos-interface
+      dellos_interface:
+        port-channel 1:
+          desc: "Connection to MX Chassis"
+          portmode: trunk
+          switchport: True
+          trunk_allowed_vlans: vlan10
+          admin: up
+          auto_neg: true
+          speed: auto
+          duplex: full
+          keepalive: true
+          suppress_ra : present
+          ip_type_dynamic: true
+          class_vendor_identifier: present
+          option82: true
+          remote_id: hostname
+    - role: dellos-vlt
+

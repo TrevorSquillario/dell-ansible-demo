@@ -1,0 +1,41 @@
+  - name: Set iDRAC manager attributes
+    uri:
+      url: "https://{{inventory_hostname}}/redfish/v1/Managers/iDRAC.Embedded.1/Attributes"
+      user: "{{idrac_user}}"
+      password: "{{ idrac_password }}"
+      force_basic_auth: yes
+      validate_certs: no
+      use_proxy: no
+      method: "PATCH"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body_format: 'json'
+      body:
+        "Attributes":
+           "GUI.1.SecurityPolicyMessage": "CUSTOM-SECURITY-POLICY-MESSAGE"
+           "SNMPAlert.1.Destination": "192.168.1.2"
+    register: result
+    tags:
+      - set_manager_attr
+
+  - name: Set iDRAC system attributes
+    uri:
+      url: "https://{{inventory_hostname}}/redfish/v1/Managers/System.Embedded.1/Attributes"
+      user: "{{idrac_user}}"
+      password: "{{ idrac_password }}"
+      force_basic_auth: yes
+      validate_certs: no
+      use_proxy: no
+      method: "PATCH"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body_format: 'json'
+      body:
+        "Attributes":
+           "ServerPwr.1.PSRedPolicy": "A/B Grid Redundant"
+           "ServerPwr.1.PSRapidOn": "Enabled"
+    register: result
+    tags:
+      - set_system_attr

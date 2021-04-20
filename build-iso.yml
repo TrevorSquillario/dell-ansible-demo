@@ -1,0 +1,9 @@
+
+- name: Generate Kickstart file
+  template:
+    src: build-iso-esxi-ks.j2
+    dest: "{{ builddir }}/esxi.cfg"
+    mode: 0400
+
+- name: Build ISO
+  command: "genisoimage -o {{ isodir }}/{{ item.hostName }}.iso -relaxed-filenames -b isolinux.bin -c boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -R -J {{ builddir }}"

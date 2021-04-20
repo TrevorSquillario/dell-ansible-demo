@@ -1,0 +1,40 @@
+---
+- name: Configure Storage
+  hosts: all
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Create RAID Sets
+    dellemc.openmanage.dellemc_idrac_storage_volume:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      state: "create"
+      controller_id: "RAID.Integrated.1-1"
+      raid_reset_config: "True" # Delete all virtual disks
+      volumes:
+        - name: "01_OS"
+          drives: 
+            id: ["Disk.Bay.0:Enclosure.Internal.0-1:RAID.Integrated.1-1","Disk.Bay.1:Enclosure.Internal.0-1:RAID.Integrated.1-1"]
+          volume_type: "RAID 1"
+          stripe_size: 262144 # 256K
+          span_length: 2
+          span_depth: 1
+          disk_cache_policy: "Enabled"
+          write_cache_policy: "WriteBack"
+          read_cache_policy: "ReadAhead"
+          raid_init_operation: "Fast"
+        - name: "02_DATA"
+          drives: 
+            id: ["Disk.Bay.6:Enclosure.Internal.0-1:RAID.Integrated.1-1","Disk.Bay.7:Enclosure.Internal.0-1:RAID.Integrated.1-1","Disk.Bay.8:Enclosure.Internal.0-1:RAID.Integrated.1-1","Disk.Bay.9:Enclosure.Internal.0-1:RAID.Integrated.1-1"]
+          volume_type: "RAID 5"
+          stripe_size: 262144 # 256K
+          span_length: 4
+          span_depth: 1
+          disk_cache_policy: "Enabled"
+          write_cache_policy: "WriteBack"
+          read_cache_policy: "ReadAhead"
+          raid_init_operation: "Fast"
+          

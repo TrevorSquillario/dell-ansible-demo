@@ -1,0 +1,26 @@
+---
+- hosts: all
+  connection: local
+  name: Provision Server
+  gather_facts: False
+  vars:
+    share_host: "{{ vault_share_host }}"
+    share_name: "{{ share_host }}:/mnt/data/iso"
+    scp_file:
+    scp_components: "IDRAC,BIOS"
+    shutdown_type: "Graceful"
+    job_wait: True
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Import Server Configuration Profile
+    dellemc.openmanage.idrac_server_config_profile:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ share_name }}"
+      command: "import" # import, export
+      scp_file: "{{ scp_file }}"
+      scp_components: "{{ scp_components }}" # ALL, IDRAC, BIOS, NIC, RAID
+      shutdown_type: "{{ shutdown_type }}" # Graceful, Forced, NoReboot
+      job_wait: "{{ job_wait }}"

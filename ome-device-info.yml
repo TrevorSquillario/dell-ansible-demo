@@ -20,21 +20,52 @@
         device_id: "{{ output.device_info.value[0].Id }}"
         cacheable: yes
 
-#    - copy:
-#        content: "{{ output }}"
-#        dest: "/tmp/dellemc.openmanage.ome_device_info_{{inventory_hostname}}.txt"
+    - set_fact:
+        device_model: "{{ output.device_info.value[0].Model }}"
+        cacheable: yes
+
+    - set_fact:
+        device_idrac_ip: "{{ output.device_info.value[0].DeviceManagement[0].NetworkAddress }}"
+        cacheable: yes
+    
+    - set_fact:
+        device_idrac_mac: "{{ output.device_info.value[0].DeviceManagement[0].MacAddress }}"
+        cacheable: yes
+
+    - debug:
+        var: "{{ item }}"
+      loop:
+        - device_id
+        - device_model
+        - device_idrac_ip
+        - device_idrac_mac
+
+    - name:
+      debug:
+        msg: "Rackmount"
+      when: device_model is match("PowerEdge R.*")
+
+    - name:
+      debug:
+        msg: "FX2"
+      when: device_model is match("PowerEdge FC.*")
+
+    - name:
+      debug:
+        msg: "MX7000"
+      when: device_model is match("PowerEdge MX.*")
 
     - name: Get detailed hardware inventory 
       dellemc.openmanage.ome_device_info:
-        hostname:  "{{ default_ome_host }}"
+        hostname: "{{ default_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         fact_subset: "detailed_inventory"
         system_query_options:
           device_service_tag:
             - "{{ service_tag }}"
-          inventory_type: deviceFru
       register: deviceinfo
 
-    - debug:
-        var: deviceinfo
+    - copy:
+        content: "{{ deviceinfo }}"
+        dest: "/tmp/dellemc.openmanage.ome_device_info_{{inventory_hostname}}.txt"

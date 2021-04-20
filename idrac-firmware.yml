@@ -1,0 +1,20 @@
+---
+- name: Update Firmware
+  hosts: all
+  connection: local
+  gather_facts: False
+  vars:
+    share_host: "{{ vault_share_host }}"
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Updating Firmware
+    dellemc.openmanage.idrac_firmware:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      share_name: "{{ share_host }}:/mnt/data/drm/R640_BIOS"
+      catalog_file_name: "R640_BIOS_1.00_Catalog.xml"
+      reboot: False # Stage Updates
+      job_wait: True
+      apply_update: True
