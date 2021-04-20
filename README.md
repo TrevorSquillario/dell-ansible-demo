@@ -20,7 +20,7 @@ ansible-galaxy install -r requirements.yml
 echo "abc123" > .vault_password
 ```
 
-4. Create an encrypted vault file (vault.yml) to store passwords. You will be prompted to enter a passphrase. 
+4. Create an encrypted vault file (vault.yml) to store passwords. This will use the passphrase from the `.vault_password` file.
 ```
 ansible-vault create vault.yml
 ```
