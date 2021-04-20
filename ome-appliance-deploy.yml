@@ -16,7 +16,7 @@
   tasks:
   - community.vmware.vmware_deploy_ovf:
       hostname: "{{ vault_vcenter_host }}"
-      username: "{{ vault_vcenter_user }}"
+      username: "{{ vault_vcenter_username }}"
       password: "{{ vault_vcenter_password }}"
       validate_certs: no
       ovf: /mnt/iso/openmanage_enterprise_ovf_format_3.5/vmx/ovf/openmanage_enterprise.x86_64-0.0.1.ovf

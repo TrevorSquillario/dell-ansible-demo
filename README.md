@@ -26,11 +26,20 @@ ansible-vault create vault.yml
 ```
 These variables will be used in the examples and should be filled in.
 ```
+# iDRAC Credentials
 vault_oob_username: ""
 vault_oob_password: ""
+# OME Credentials
 vault_ome_username: ""
 vault_ome_password: ""
+
+# Optional
 vault_share_host: ""
+vault_vcenter_host: ""
+vault_vcenter_username: ""
+vault_vcenter_password: ""
+vault_esxi_username: ""
+vault_esxi_password: ""
 ```
 
 5. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules. 

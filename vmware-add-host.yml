@@ -1,0 +1,60 @@
+---
+- name: Add Host to Cluster
+  hosts: mx-sleds
+  connection: local
+  gather_facts: False
+  vars_files:
+    - vault.yml
+  vars:
+    datastores:
+      - name: "NFS01_Datastore01"
+        server: "{{ vault_share_host }}"
+        path: /mnt/data/vm
+        type: nfs
+        state: present
+  tasks:
+    - name: Add ESXi Host to Cluster
+      community.vmware.vmware_host:
+        hostname: "{{ vault_vcenter_host }}"
+        username: "{{ vault_vcenter_username }}"
+        password: "{{ vault_vcenter_password }}"
+        validate_certs: false
+        datacenter: "DataCenter01"
+        cluster: "Cluster01" 
+        esxi_hostname: "{{ ansible_fqdn }}"
+        esxi_username: "{{ vault_esxi_username }}"
+        esxi_password: "{{ vault_esxi_password }}"
+        state: present
+      tags: ["addhost"]
+
+    - name: Mount NFS datastores to ESXi host
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ vault_vcenter_host }}"
+        username: "{{ vault_vcenter_username }}"
+        password: "{{ vault_vcenter_password }}"
+        validate_certs: false
+        esxi_hostname: '{{ ansible_fqdn }}'
+        datastore_name: '{{ item.name }}'
+        datastore_type: '{{ item.type }}'
+        nfs_server: '{{ item.server }}'
+        nfs_path: '{{ item.path }}'
+        nfs_ro: no
+        state: "{{ item.state }}"
+      loop: "{{ datastores }}"
+      tags: ["datastore"]
+
+    - name: Add vMotion vmkernel port
+      community.vmware.vmware_vmkernel:
+        hostname: "{{ vault_vcenter_host }}"
+        username: "{{ vault_vcenter_username }}"
+        password: "{{ vault_vcenter_password }}"
+        validate_certs: false
+        esxi_hostname: "{{ ansible_fqdn }}"
+        portgroup_name: "Management Network"
+        device: vmk0
+        enable_mgmt: True
+        enable_vmotion: True
+        network:
+          type: 'dhcp'
+        state: present
+      tags: ["network"]
