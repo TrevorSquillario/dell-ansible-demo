@@ -1,7 +1,26 @@
 # DellEMC OpenManage Ansible Demo
 
 ## Getting Started
-1. Create an encrypted vault file (vault.yml) to store passwords. You will be prompted to enter a passphrase. 
+1. Setup Python Virtual Environment (optional but recommended)
+```
+pip install virtualenv
+mkdir ~/venv
+python -m virtualenv ~/venv/ansible-dell
+source ~/venv/ansible-dell/bin/activate
+```
+
+2. Install Dependencies
+```
+pip install omsdk pyvmomi ansible
+ansible-galaxy install -r requirements.yml
+```
+
+3. Save the passphrase in a file called .vault_password. This file is referenced in the `ansible.cfg` config file `vault_password_file` setting.
+```
+echo "abc123" > .vault_password
+```
+
+4. Create an encrypted vault file (vault.yml) to store passwords. You will be prompted to enter a passphrase. 
 ```
 ansible-vault create vault.yml
 ```
@@ -11,38 +30,18 @@ vault_oob_username: ""
 vault_oob_password: ""
 vault_ome_username: ""
 vault_ome_password: ""
-vault_ome_host: ""
 vault_share_host: ""
 ```
 
-2. Save the passphrase in a file called .vault_password. This file is referenced in the `ansible.cfg` config file `vault_password_file` setting.
-```
-echo "abc123" > .vault_password
-```
-
-3. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules. 
+5. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules. 
 ```
 [group-name]
 hostname oob_host=<iDRAC IP or Hostname> service_tag=<Service Tag>
 ```
 
-4. Update global variables. Edit the `inventory/us-west/all/00_all.yml` file and update the `default_ome_host` variable. This can be the OpenManage Enterprise server or MX7000 Chassis for OpenManage Modular.
+6. Update global variables. Edit the `inventory/us-west/all/00_all.yml` file and update the `default_ome_host` variable. This can be the OpenManage Enterprise server or MX7000 Chassis for OpenManage Modular.
 ```
 default_ome_host: "mx7000-chassis.example.com"
-```
-
-5. Setup Python Virtual Environment (optional but recommended)
-```
-pip install virtualenv
-mkdir ~/venv
-python -m virtualenv ~/venv/ansible-dell
-source ~/venv/ansible-dell/bin/activate
-```
-
-6. Install Dependencies
-```
-pip install omsdk pyvmomi ansible
-ansible-galaxy install -r requirements.yml
 ```
 
 7. Execute a playbook

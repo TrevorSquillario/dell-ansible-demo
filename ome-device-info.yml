@@ -16,6 +16,10 @@
           filter: "DeviceServiceTag eq '{{ service_tag }}'"
       register: output
 
+    - copy:
+        content: "{{ output }}"
+        dest: "/tmp/dellemc.openmanage.ome_device_info_basic_{{inventory_hostname}}.txt"
+
     - set_fact:
         device_id: "{{ output.device_info.value[0].Id }}"
         cacheable: yes
