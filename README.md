@@ -68,8 +68,3 @@ You could also use a dynamic inventory script to query your internal inventory o
 │       │   ├── mx-sleds.yml # Group variables, matches inventory group name
 │       └── hosts # Static inventory file containing hosts and host_vars
 ```
-
-## Folders
-```
-
-```
