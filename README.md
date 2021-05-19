@@ -11,7 +11,7 @@ source ~/venv/ansible-dell/bin/activate
 
 2. Install Dependencies
 ```
-pip install omsdk pyvmomi ansible
+pip install omsdk pyvmomi paramiko ansible
 ansible-galaxy install -r requirements.yml
 ```
 
@@ -42,7 +42,7 @@ vault_esxi_username: ""
 vault_esxi_password: ""
 ```
 
-5. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules. 
+5. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules.
 ```
 [group-name]
 hostname oob_host=<iDRAC IP or Hostname> service_tag=<Service Tag>
@@ -67,7 +67,7 @@ Instead of maintaining all of your hosts within a single inventory file, an inve
 Target multiple inventories by specifing the -i parameter again.
 Ex: `ansible-playbook -i inventory/us-west -i inventory/us-east ome-device-info.yml`
 
-You could also use a dynamic inventory script to query your internal inventory or a 3rd party provider. 
+You could also use a dynamic inventory script to query your internal inventory or a 3rd party provider.
 ```
 ├── inventory
 │   └── us-west

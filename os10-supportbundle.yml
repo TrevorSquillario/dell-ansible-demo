@@ -1,0 +1,65 @@
+# Based on https://www.dell.com/support/kbdoc/en-us/000132936/how-to-generate-and-collect-support-bundle-in-dell-emc-networking-os10-switches
+- hosts: all
+  connection: network_cli
+  gather_facts: no
+  vars:
+    cleanup: true
+    generate: true
+    download: true
+    supportbundles: []
+  tasks:
+    - name: "Generate Support Bundle"
+      dellos10_command:
+        commands: ['generate support-bundle enable-all-plugin-options']
+      when: generate
+
+    - name: "Waiting for 20 Minutes Support Bundle to Finish."
+      pause:
+        minutes: 20
+
+# ***This doesn't work when multiple bundles are generated. It will match on a previous BUNDLE_COMPLETED message in the log.
+#    - name: "Waiting for Support Bundle to Finish. *This can take up to 15 minutes"
+#      dellos10_command:
+#        commands:
+#          - show logging log-file
+#        interval: 15
+#        retries: 120 # 30 Minutes
+#        wait_for:
+#        - result[0] contains BUNDLE_COMPLETED
+#      when: generate
+
+    - name: "Get Support Bundle Name"
+      dellos10_command:
+        commands:
+          - dir supportbundle
+      register: out_supportbundle
+
+    - debug:
+        var: out_supportbundle
+
+    - name: "Create List of Bundles to Download"
+      set_fact:
+        supportbundles: "{{ supportbundles }} + [ '{{ item | trim | regex_search(regexp_extract) }}' ]"
+      vars:
+        regexp_extract: 'sosreport-(.+)'
+        regexp_match: 'sosreport-.*.tar.xz$'
+      loop: "{{ out_supportbundle.stdout_lines[0] }}"
+      when: item | trim | regex_search(regexp_match)
+
+    - debug:
+        var: supportbundles
+
+    - name: "Download Support Bundles"
+      dellos10_command:
+        commands:
+          - "copy supportbundle://{{ item }} scp://backup:password@192.168.1.100/mnt/data/backup/{{ item }}"
+      loop: "{{ supportbundles }}"
+      when: download
+
+# Doesn't work yet, need to answer the prompt with 'yes' https://github.com/ansible-collections/dellemc.os10/issues/83
+#    - name: "Remove Support Bundle"
+#      dellos10_command:
+#        commands:
+#          - "delete supportbundle://{{ item }}"
+#      loop: "{{ supportbundles }}"
+#      when: cleanup
