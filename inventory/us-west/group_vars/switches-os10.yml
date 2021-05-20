@@ -3,4 +3,4 @@ ansible_ssh_user: "{{ vault_network_username }}"
 ansible_ssh_pass: "{{ vault_network_password }}"
 ansible_become_method: enable
 ansible_become: yes
-ansible_become_pass: admin
+ansible_become_pass: "{{ vault_network_password }}"
