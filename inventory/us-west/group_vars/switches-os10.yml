@@ -1,0 +1,6 @@
+ansible_network_os: dellos10
+ansible_ssh_user: "{{ vault_network_username }}"
+ansible_ssh_pass: "{{ vault_network_password }}"
+ansible_become_method: enable
+ansible_become: yes
+ansible_become_pass: admin

@@ -40,6 +40,8 @@ vault_vcenter_username: ""
 vault_vcenter_password: ""
 vault_esxi_username: ""
 vault_esxi_password: ""
+vault_network_username: ""
+vault_network_password: ""
 ```
 
 5. Update the inventory `inventory/us-west/hosts` with your hosts. Two host variables are used: `oob_host` to identify the out-of-band (iDRAC) IP or hostname and `service_tag` which is used in the ome_* modules.
@@ -60,6 +62,9 @@ ansible-playbook -i inventory/us-west ome-device-info.yml
 
 ## Custom Modules
 The `library` folder contains modules developed by myself which have not been officially released yet. These are to be used at you own risk.
+
+## Network Modules
+Credentials to login to network switches are stored in the following vault variables `vault_network_username` and `vault_network_password`. These variables are referenced in the group_vars file `switches-os10.yml` which sets the necessary parameters to use the `network_cli` connection. This requires the `paramiko` Python library to be installed.
 
 ## Inventory
 Instead of maintaining all of your hosts within a single inventory file, an inventory can be maintained for each of your individual environments. Separate group_vars directories are also maintained. Symlinks can be used to share group variable files between environments. This can be used to separate environments (dev, test, prod) or physical locations (us-west, us-east).

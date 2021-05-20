@@ -1,5 +1,5 @@
 # Based on https://www.dell.com/support/kbdoc/en-us/000132936/how-to-generate-and-collect-support-bundle-in-dell-emc-networking-os10-switches
-- hosts: all
+- hosts: switches
   connection: network_cli
   gather_facts: no
   vars:
@@ -7,6 +7,8 @@
     generate: true
     download: true
     supportbundles: []
+  vars_files:
+    - vault.yml
   tasks:
     - name: "Generate Support Bundle"
       dellos10_command:

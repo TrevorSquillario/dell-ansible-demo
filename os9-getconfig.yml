@@ -1,8 +1,0 @@
-- hosts: s55
-  tasks:
-    - dellos9_facts:
-        gather_subset: ["all"] 
-      register: facts
-
-    - debug: 
-        var: facts

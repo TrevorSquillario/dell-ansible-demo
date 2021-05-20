@@ -20,3 +20,9 @@ MX5108-C38T9T2 service_tag=C38ZZZZ
 mx-sleds
 mx-chassis
 mx-iom
+
+[switches-os10:children]
+mx-iom
+
+[switches:children]
+switches-os10
