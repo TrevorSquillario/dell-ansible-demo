@@ -2,12 +2,12 @@
   connection: network_cli
   gather_facts: no
   vars:
-    backup: no
+    backup: true
   vars_files:
     - vault.yml
   tasks:
     - name: "Get Dell EMC Show version"
-      dellos10_command:
+      dellemc.os10.os10_command:
         commands: ['show version']
       register: show_ver
 
@@ -15,6 +15,6 @@
         var: show_ver
 
     - name: "Backup Running Config"
-      dellos10_command:
+      dellemc.os10.os10_command:
         commands: ['copy running-configuration scp://root:calvin@192.168.1.102/mnt/data/mx9116_backup.txt']
       when: backup

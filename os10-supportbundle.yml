@@ -4,24 +4,25 @@
   gather_facts: no
   vars:
     cleanup: true
-    generate: true
-    download: true
+    generate: false
+    download: false
     supportbundles: []
   vars_files:
     - vault.yml
   tasks:
     - name: "Generate Support Bundle"
-      dellos10_command:
+      dellemc.os10.os10_command:
         commands: ['generate support-bundle enable-all-plugin-options']
       when: generate
 
     - name: "Waiting for 20 Minutes Support Bundle to Finish."
       pause:
         minutes: 20
+      when: generate
 
 # ***This doesn't work when multiple bundles are generated. It will match on a previous BUNDLE_COMPLETED message in the log.
 #    - name: "Waiting for Support Bundle to Finish. *This can take up to 15 minutes"
-#      dellos10_command:
+#      dellemc.os10.os10_command:
 #        commands:
 #          - show logging log-file
 #        interval: 15
@@ -30,8 +31,8 @@
 #        - result[0] contains BUNDLE_COMPLETED
 #      when: generate
 
-    - name: "Get Support Bundle Name"
-      dellos10_command:
+    - name: "Get Support Bundles"
+      dellemc.os10.os10_command:
         commands:
           - dir supportbundle
       register: out_supportbundle
@@ -39,7 +40,7 @@
     - debug:
         var: out_supportbundle
 
-    - name: "Create List of Bundles to Download"
+    - name: "Create List of Bundle Names to Download"
       set_fact:
         supportbundles: "{{ supportbundles }} + [ '{{ item | trim | regex_search(regexp_extract) }}' ]"
       vars:
@@ -52,16 +53,17 @@
         var: supportbundles
 
     - name: "Download Support Bundles"
-      dellos10_command:
+      dellemc.os10.os10_command:
         commands:
           - "copy supportbundle://{{ item }} scp://backup:password@192.168.1.100/mnt/data/backup/{{ item }}"
       loop: "{{ supportbundles }}"
       when: download
 
-# Doesn't work yet, need to answer the prompt with 'yes' https://github.com/ansible-collections/dellemc.os10/issues/83
-#    - name: "Remove Support Bundle"
-#      dellos10_command:
-#        commands:
-#          - "delete supportbundle://{{ item }}"
-#      loop: "{{ supportbundles }}"
-#      when: cleanup
+    - name: "Remove Support Bundles"
+      dellemc.os10.os10_command:
+        commands:
+          - command: "delete supportbundle://{{ item }}*"
+            prompt: "Proceed to delete"
+            answer: "Yes"
+      loop: "{{ supportbundles }}"
+      when: cleanup

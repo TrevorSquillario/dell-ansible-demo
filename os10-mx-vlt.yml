@@ -19,6 +19,7 @@
             - port: fortyGigE 1/14
               state: present
           state: present
+
     - role: dellos-interface
       dellos_interface:
         port-channel 1:
