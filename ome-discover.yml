@@ -1,44 +1,47 @@
 ---
-- hosts: MX740c-C39P9T2
+- hosts: localhost
   connection: local
   name: Discover
   gather_facts: False
   vars:
     retries_count: 100
     polling_interval: 10
-    domain: "gcnose.adc.delllabs.net"
   vars_files:
     - vault.yml
   tasks:
-    - ome_discovery: # Official module not released yet, using version from local /library 
-        hostname: "{{ default_ome_host }}"
+    - name: Discover servers in a range
+      dellemc.openmanage.ome_discovery:
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
-        #schedule: "run_later"
-        #schedule_cron: "0 0 0 * * ? *" # Daily
-        #schedule_cron: "0 19 19 16 5 ? 2019" # Later at Date
-        name: "AnsibleTestNew3"
-        discover_range: 
-        #  - "{{ oob_host }}"
-        #  - "192.168.2.100/26"
-          - "MX740c-C39P9T2"
-          - "MX840c-C39N9T2"
-        discover_username: "root"
-        discover_password: "{{ vault_ome_password }}"
-        trap_destination: False
-        device_type: "server"
-        state: absent
+        discovery_job_name: "Discovery Server 01"
+        discovery_config_targets:
+          - network_address_detail:
+              - "192.35.0.0"
+            #  - "192.36.0.0-10.36.0.255"
+            #  - "192.37.0.0/24"
+            #  - "2345:f2b1:f083:135::5500/118"
+            #  - "2345:f2b1:f083:135::a500-2607:f2b1:f083:135::a600"
+            #  - "hostname.domain.tld"
+            #  - "hostname"
+            #  - "2345:f2b1:f083:139::22a"
+            device_types:
+              - SERVER
+            wsman:
+              username: "root"
+              password: "{{ vault_ome_password }}"
+        job_wait: False
       register: output
 
-#    - debug:
-#        var: output
+    - debug:
+        var: output
 
 #    - name: "Track job details for the discovery using a job id."
 #      dellemc.openmanage.ome_job_info:
-#        hostname: "{{ default_ome_host }}"
+#        hostname: "{{ vault_ome_host }}"
 #        username: "{{ vault_ome_username }}"
 #        password: "{{ vault_ome_password }}"
-#        job_id: "{{ output.discover_status.DiscoveryConfigTaskParam[0].TaskId }}"
+#        job_id: "{{ output.discover_status.JobId }}"
 #      register: job_result
 #      until: job_result.job_info.LastRunStatus.Name == 'Completed' or job_result.job_info.LastRunStatus.Name == 'Failed' or job_result.job_info.LastRunStatus.Name == 'Warning'
 #      failed_when: job_result.job_info.LastRunStatus.Name == 'Failed'

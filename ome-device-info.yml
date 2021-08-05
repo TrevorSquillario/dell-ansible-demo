@@ -8,7 +8,7 @@
   tasks:
     - name: Get device id by service tag
       dellemc.openmanage.ome_device_info:
-        hostname:  "{{ default_ome_host }}"
+        hostname:  "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         fact_subset: "basic_inventory"
@@ -61,7 +61,7 @@
 
     - name: Get detailed hardware inventory 
       dellemc.openmanage.ome_device_info:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         fact_subset: "detailed_inventory"

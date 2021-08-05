@@ -50,9 +50,9 @@ vault_network_password: ""
 hostname oob_host=<iDRAC IP or Hostname> service_tag=<Service Tag>
 ```
 
-6. Update global variables. Edit the `inventory/us-west/all/00_all.yml` file and update the `default_ome_host` variable. This can be the OpenManage Enterprise server or MX7000 Chassis for OpenManage Modular.
+6. Update global variables. Edit the `inventory/us-west/all/00_all.yml` file and update the `vault_ome_host` variable. This can be the OpenManage Enterprise server or MX7000 Chassis for OpenManage Modular.
 ```
-default_ome_host: "mx7000-chassis.example.com"
+vault_ome_host: "mx7000-chassis.example.com"
 ```
 
 7. Execute a playbook

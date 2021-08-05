@@ -10,7 +10,7 @@
   roles:
     - role: ome-alert-policy
       vars:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         name: "TSTest"
@@ -18,7 +18,7 @@
   tasks:
     - name: Configure Network
       dellemc.openmanage.ome_application_network_address:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         #management_vlan:
@@ -32,7 +32,7 @@
         
     - name: Configure NTP server for time synchronization.
       dellemc.openmanage.ome_application_network_time:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         enable_ntp: true
@@ -42,14 +42,14 @@
 
     - name: Update session time out
       dellemc.openmanage.ome_application_network_webserver:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         webserver_timeout: 120 # Minutes, this is the max for the MX7000
       
 #    - name: Change password for root
 #      dellemc.openmanage.ome_user:
-#        hostname: "{{ default_ome_host }}"
+#        hostname: "{{ vault_ome_host }}"
 #        username: "{{ vault_ome_username }}"
 #        password: "{{ vault_ome_password }}"
 #        state: "present"
@@ -61,7 +61,7 @@
 
     - name: Create user
       dellemc.openmanage.ome_user:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         state: "present"
@@ -73,7 +73,7 @@
 
     - name: Configure Chassis
       ome_chassis: # Official module not released yet, using version from local /library 
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         name: "{{ inventory_hostname | upper }}"

@@ -14,7 +14,7 @@
   tasks:
   - name: Power On Server
     dellemc.openmanage.ome_powerstate:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       device_service_tag: "{{ service_tag }}"
@@ -22,7 +22,7 @@
 
   - name: Create baseline 
     dellemc.openmanage.ome_firmware_baseline:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       baseline_name: "{{ baseline_name }}"
@@ -37,7 +37,7 @@
 
   - name: Update firmware using baseline
     dellemc.openmanage.ome_firmware:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       baseline_name: "{{ baseline_name }}"
@@ -46,7 +46,7 @@
 
   - name: Wait on Firmware Update Job to Complete
     dellemc.openmanage.ome_job_info:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       job_id: "{{ firmware_update.update_status.Id }}"
@@ -60,7 +60,7 @@
 
   - name: Deploy Template
     dellemc.openmanage.ome_template:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       command: "deploy"
@@ -85,7 +85,7 @@
 
   - name: Wait on Deploy Job to Complete
     dellemc.openmanage.ome_job_info:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       job_id: "{{ output_deploy.return_id }}"

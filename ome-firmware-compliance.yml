@@ -13,7 +13,7 @@
   tasks:
     - name: Check if host needs updated
       dellemc.openmanage.ome_firmware_baseline_compliance_info:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         baseline_name: "{{ baseline_name }}"

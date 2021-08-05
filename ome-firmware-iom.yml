@@ -14,7 +14,7 @@
     - block:
         - name: Get compute devices
           dellemc.openmanage.ome_device_info:
-            hostname: "{{ default_ome_host }}"
+            hostname: "{{ vault_ome_host }}"
             username: "{{ vault_ome_username }}"
             password: "{{ vault_ome_password }}"
             fact_subset: "basic_inventory"
@@ -33,7 +33,7 @@
 
     - name: Update IOM Firmware # DUP or CLI is the only way to update network IOM. Baseline method not supported.
       dellemc.openmanage.ome_firmware:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         device_service_tag: "{{ service_tag }}"

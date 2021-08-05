@@ -6,27 +6,19 @@
   vars_files:
     - vault.yml
   tasks:
-    - ome_group: # Official module not released yet, using version from local /library 
-        hostname: "{{ default_ome_host }}"
+    - dellemc.openmanage.ome_groups:
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         name: "Test1"
         description: "Test Group"
-        parent_name: "Static Groups"
+        parent: "Static Groups"
   
-    - ome_group_device: # Official module not released yet, using version from local /library 
-        hostname: "{{ default_ome_host }}"
+    - dellemc.openmanage.ome_device_group: 
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         name: "Test"
-        devices: 
-          - "MX740c-C39P9T2.gcnose.adc.delllabs.net"
-          - "MX840c-C39N9T2.gcnose.adc.delllabs.net"
-
-    - ome_group_device: # Official module not released yet, using version from local /library 
-        hostname: "{{ default_ome_host }}"
-        username: "{{ vault_ome_username }}"
-        password: "{{ vault_ome_password }}"
-        name: "Dallas TEst"
-        devices: 
-          - "MX740c-C39P9T2.gcnose.adc.delllabs.net"
+        device_service_tags: 
+          - "C39P9T2"
+          - "C39N9T2"

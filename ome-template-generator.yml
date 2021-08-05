@@ -11,7 +11,7 @@
         AcPwrRcvryDelay: "Random"
       iDRAC.Embedded.1:
         IPv4.1.DNSFromDHCP: "Enabled"
-        GUI.1.SecurityPolicyMessage: 'GCN OSE Lab'
+        GUI.1.SecurityPolicyMessage: 'Test Lab'
         Time.Timezone: 'America/Denver' 
       System.Embedded.1: 
         ServerPwr.1.PSRedPolicy: 1
@@ -35,7 +35,7 @@
 
     - name: Wait for template to be created
       dellemc.openmanage.ome_template_info:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         template_id: "{{ output.return_id }}"

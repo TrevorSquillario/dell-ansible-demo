@@ -1,2 +1,2 @@
-default_ome_host: mx7000-chassis.example.com
+vault_ome_host: mx7000-chassis.example.com
 oob_type: idrac

@@ -8,7 +8,7 @@
   tasks:
   - name: Deploy Template
     dellemc.openmanage.ome_template:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       command: "deploy"
@@ -33,7 +33,7 @@
 
   - name: Wait on Deploy to Complete
     dellemc.openmanage.ome_job_info:
-      hostname:  "{{ default_ome_host }}"
+      hostname:  "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       job_id: "{{ output_deploy.return_id }}"

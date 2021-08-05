@@ -37,7 +37,7 @@
   tasks:
 #    - name: Create MCM Group # The management module that is used for creating the MCM is the leader of the group
 #      ome_mcm_group: # Official module not released yet, using version from local /library 
-#        hostname: "{{ default_ome_host }}"
+#        hostname: "{{ vault_ome_host }}"
 #        username: "{{ vault_ome_username }}"
 #        password: "{{ vault_ome_password }}"
 #        name: LabMX7000Group
@@ -49,7 +49,7 @@
 
     - name: Create VLANs
       dellemc.openmanage.ome_network_vlan:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         state: present
@@ -63,7 +63,7 @@
 
     - name: "Create a smart fabric"
       dellemc.openmanage.ome_smart_fabric:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         state: present
@@ -77,7 +77,7 @@
 
 #    - name: Set Port breakout configuration to default.
 #      dellemc.openmanage.ome_network_port_breakout:
-#        hostname: "{{ default_ome_host }}"
+#        hostname: "{{ vault_ome_host }}"
 #        username: "{{ vault_ome_username }}"
 #        password: "{{ vault_ome_password }}"
 #        target_port: "{{ item }}:{{ uplink_portgroup }}"
@@ -91,7 +91,7 @@
 
     - name: Set Port breakout configuration.
       dellemc.openmanage.ome_network_port_breakout:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         target_port: "{{ item }}:{{ uplink_portgroup }}"
@@ -105,7 +105,7 @@
 
     - name: Create uplink
       dellemc.openmanage.ome_smart_fabric_uplink:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         state: "present"
@@ -125,7 +125,7 @@
 
     - name: Create an identity pool using only ethernet settings.
       dellemc.openmanage.ome_identity_pool:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         pool_name: "TestPool02"

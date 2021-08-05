@@ -23,7 +23,7 @@
 
     - name: Create template from device
       dellemc.openmanage.ome_template:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         command: "create"
@@ -40,7 +40,7 @@
 
     - name: Wait for template to be created
       dellemc.openmanage.ome_template_info:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         template_id: "{{ output.return_id }}"
@@ -58,7 +58,7 @@
 
     - name: Assign VLANs to template 
       dellemc.openmanage.ome_template_network_vlan:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         template_name: "{{ template_name }}"
@@ -82,7 +82,7 @@
 
     - name: Attach identity pool to template
       dellemc.openmanage.ome_template_identity_pool:
-        hostname: "{{ default_ome_host }}"
+        hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
         template_name: "{{ template_name }}"

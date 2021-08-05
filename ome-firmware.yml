@@ -11,7 +11,7 @@
   tasks:
   - name: Create catalog from NFS network share
     dellemc.openmanage.ome_firmware_catalog:
-      hostname: "{{ default_ome_host }}"
+      hostname: "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       catalog_name: "{{ catalog_name }}"
@@ -22,7 +22,7 @@
 
   - name: Create baseline 
     dellemc.openmanage.ome_firmware_baseline:
-      hostname: "{{ default_ome_host }}"
+      hostname: "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       baseline_name: "{{ baseline_name }}"
@@ -33,14 +33,14 @@
 
   - name: Retrieves device compliance report 
     dellemc.openmanage.ome_firmware_baseline_compliance_info:
-      hostname: "{{ default_ome_host }}"
+      hostname: "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       baseline_name: "{{ baseline_name }}"
 
   - name: Update firmware using baseline
     dellemc.openmanage.ome_firmware:
-      hostname: "{{ default_ome_host }}"
+      hostname: "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       baseline_name: "{{ baseline_name }}"
@@ -51,7 +51,7 @@
 
   - name: Wait on Deploy to Complete
     dellemc.openmanage.ome_job_info:
-      hostname: "{{ default_ome_host }}"
+      hostname: "{{ vault_ome_host }}"
       username: "{{ vault_ome_username }}"
       password: "{{ vault_ome_password }}"
       job_id: "{{ output.return_id }}"
