@@ -1,3 +1,7 @@
+###
+# Playbook will get the current Boot Mode (UEFI/BIOS) and set OneTimeBoot to PXE device. 
+# The 'idrac_bios' module will automatically apply changes, reboot the server and wait until the server has been rebooted. 
+###
 ---
 - hosts: all
   connection: local
@@ -21,22 +25,26 @@
       set_fact:
         boot_mode: "{{ result_attributes.redfish_facts.bios_attribute.entries.0.1.BootMode }}"
 
+    - debug:
+        msg: "Boot mode set to {{ boot_mode }}"
+    
     - name: UEFI
       block:
 
         - name: Set OneTimeBoot (UEFI)
-          community.general.redfish_config:
-            baseuri: "{{ oob_host }}"
-            username: "{{ vault_oob_username }}"
-            password: "{{ vault_oob_password }}"
-            category: Systems
-            command: SetBiosAttributes
-            bios_attributes:
+          dellemc.openmanage.idrac_bios:
+            idrac_ip: "{{ oob_host }}"
+            idrac_user: "{{ vault_oob_username }}"
+            idrac_password: "{{ vault_oob_password }}"
+            attributes:
               PxeDev1EnDis: "Enabled"
               PxeDev1Interface: "{{ pxe_device }}"
               OneTimeBootMode: "OneTimeUefiBootSeq"
               OneTimeUefiBootSeqDev: "NIC.PxeDevice.1-1"
-          register: result_uefi
+          register: result
+
+        - debug:
+            var: result
 
       when: boot_mode == "Uefi" # Only run block when boot mode is Uefi
 
@@ -44,7 +52,7 @@
       block:
       
         - name: Set OneTimeBootMode (LegacyBoot)
-          community.general.redfish_config:
+          dellemc.openmanage.idrac_bios:
             baseuri: "{{ oob_host }}"
             username: "{{ vault_oob_username }}"
             password: "{{ vault_oob_password }}"
@@ -53,28 +61,9 @@
             bios_attributes:
               OneTimeBootMode: "OneTimeBootSeq"
               OneTimeBootSeqDev: "{{ pxe_device }}"
-          register: result_bios
+          register: result
+
+        - debug:
+            var: result
 
       when: boot_mode == "Bios" # Only run block when boot mode is Bios
-      
-    - name: Create BIOS Config job
-      community.general.idrac_redfish_command:
-        baseuri: "{{ oob_host }}"
-        username: "{{ vault_oob_username }}"
-        password: "{{ vault_oob_password }}"
-        category: Systems
-        command: CreateBiosConfigJob
-      when: result_uefi.changed or result_bios.changed # Only run when things have changed
-      register: result_job
-
-    - debug:
-        var: result_job
-  
-    - name: Restart sytem power gracefully
-      community.general.redfish_command:
-        category: Systems
-        command: PowerGracefulRestart
-        baseuri: "{{ oob_host }}"
-        username: "{{ vault_oob_username }}"
-        password: "{{ vault_oob_password }}"
-      when: result_uefi.changed or result_bios.changed # Only run when things have changed
