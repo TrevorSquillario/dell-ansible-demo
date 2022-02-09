@@ -16,19 +16,40 @@
         name: "TSTest"
         description: "{{ ansible_managed }}"
   tasks:
-    - name: Configure Network
-      dellemc.openmanage.ome_application_network_address:
+    - name: Configure network for chassis
+      dellemc.openmanage.ome_device_mgmt_network:
         hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
-        #management_vlan:
-        #  enable_vlan: true
-        #  vlan_id: 3344
+        device_service_tag: "{{ service_tag }}"
+        ipv4_configuration:
+          enable_ipv4: True
+          enable_dhcp: True
+          #static_ip_address: 192.168.0.2
+          #static_subnet_mask: 255.255.254.0
+          #static_gateway: 192.168.0.3
+          use_dhcp_to_obtain_dns_server_address: True
+          #static_preferred_dns_server: 192.168.0.4
+          #static_alternate_dns_server: 192.168.0.5
+        ipv6_configuration:
+          enable_ipv6: False
+          enable_auto_configuration: False
+          #static_ip_address: 2626:f2f2:f081:9:1c1c:f1f1:4747:1
+          #static_prefix_length: 10
+          #static_gateway: ffff::2607:f2b1:f081:9
+          use_dhcpv6_to_obtain_dns_server_address: True
+          #static_preferred_dns_server: 2626:f2f2:f081:9:1c1c:f1f1:4747:3
+          #static_alternate_dns_server: 2626:f2f2:f081:9:1c1c:f1f1:4747:4
         dns_configuration:
-          use_dhcp_for_dns_domain_name: True
-          #dns_domain_name: "{{ dns_domain }}"
-          #register_with_dns: True
-          #dns_name: "{{ inventory_hostname }}" # Does not set Chassis Name
+          register_with_dns: true
+          #use_dhcp_for_dns_domain_name: false
+          dns_name: "{{ inventory_hostname | upper }}"
+          dns_domain_name: "example.com"
+          #auto_negotiation: no
+          #network_speed: 100_MB
+        #management_vlan:
+          #  enable_vlan: true
+          #  vlan_id: 3344
         
     - name: Configure NTP server for time synchronization.
       dellemc.openmanage.ome_application_network_time:
@@ -71,20 +92,93 @@
           RoleId: "16" # Viewer
           Enabled: True
 
-    - name: Configure Chassis
-      ome_chassis: # Official module not released yet, using version from local /library 
+    - name: Configure Chassis Slots
+      dellemc.openmanage.ome_chassis_slots: 
         hostname: "{{ vault_ome_host }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
-        name: "{{ inventory_hostname | upper }}"
-        chassis_service_tag: "{{ service_tag }}"
-        slot_names:
-          - slot: 1
-            name: Slot-1
-          - slot: 2
-            name: Slot-2
-          - slot: 3
-            name: Slot-3
-      register: chassis_out
-      tags:
-        - slots
+        slot_options:
+          - chassis_service_tag: "{{ service_tag }}"
+            slots:
+              - slot_number: 1
+                slot_name: "{{ inventory_hostname | upper }}"
+              - slot_number: 2
+                slot_name: sled_name_2
+
+    - name: Configure Chassis Location
+      dellemc.openmanage.ome_device_location:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        data_center: data center 2
+        room: room 7
+        aisle: aisle 4
+        rack: rack 6
+        rack_slot: 22
+        location: location 5
+
+    - name: Configure all local access settings of the host chassis.
+      dellemc.openmanage.ome_device_local_access_configuration:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        enable_kvm_access: true
+        enable_chassis_direct_access: false
+        chassis_power_button:
+          enable_chassis_power_button: false
+          enable_lcd_override_pin: true
+          disabled_button_lcd_override_pin: 123456
+        quick_sync:
+          quick_sync_access: READ_WRITE
+          enable_read_authentication: true
+          enable_quick_sync_wifi: true
+          enable_inactivity_timeout: true
+          timeout_limit: 120
+          timeout_limit_unit: SECONDS
+        lcd:
+          lcd_access: VIEW_MODIFY
+          lcd_language: en
+          user_defined: "LCD Text"
+
+    - name: Configure Network Services 
+      dellemc.openmanage.ome_device_network_services:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        snmp_settings:
+          enabled: true
+          port_number: 161
+          community_name: public
+        ssh_settings:
+          enabled: true
+          port_number: 22
+          max_sessions: 25
+          max_auth_retries: 3
+          idle_timeout: 60
+        remote_racadm_settings:
+          enabled: false
+
+    - name: Configure SMTP
+      dellemc.openmanage.ome_application_alerts_smtp:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        destination_address: "smtp.example.com"
+        port_number: 25
+        use_ssl: false
+        enable_authentication: false
+
+    - name: Configure Chassis Power Settings
+      dellemc.openmanage.ome_device_power_settings:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        redundancy_configuration:
+          redundancy_policy: GRID_REDUNDANCY
+        hot_spare_configuration:
+          enable_hot_spare: true
+          primary_grid: GRID_1

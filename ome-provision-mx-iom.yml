@@ -8,15 +8,28 @@
   vars_files:
     - vault.yml
   tasks:
-    - name: Configure Chassis IOM
-      ome_chassis_iom: # Official module not released yet, using version from local /library
-        hostname: "{{ vault_ome_host }}"
-        username: "{{ vault_ome_username }}"
-        password: "{{ vault_ome_password }}"
-        name: "{{ inventory_hostname | upper }}"
-        #root_password: "admin"
-        device_service_tag: "{{ service_tag }}"
-        ipv4_dhcp_enable: False
-        ipv6_enable: False
-        ipv6_dhcp_enable: true
-        snmp_community_string: "public"
+  - name: Configure Chassis IOM
+    dellemc.openmanage.ome_device_mgmt_network:
+      hostname: "{{ vault_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      device_service_tag: "{{ service_tag }}"
+      ipv4_configuration:
+        enable_ipv4: True
+        enable_dhcp: True
+        #static_ip_address: 192.168.0.2
+        #static_subnet_mask: 255.255.254.0
+        #static_gateway: 192.168.0.3
+      ipv6_configuration:
+        enable_ipv6: False
+        enable_auto_configuration: False
+        #static_ip_address: 2626:f2f2:f081:9:1c1c:f1f1:4747:1
+        #static_prefix_length: 10
+        #static_gateway: ffff::2607:f2b1:f081:9
+      dns_configuration:
+        dns_domain_name: example.com
+        register_with_dns: True
+        dns_name: "{{ inventory_hostname | upper }}"
+      #dns_server_settings:
+      #  preferred_dns_server: 192.168.0.4
+      #  alternate_dns_server1: 192.168.0.5

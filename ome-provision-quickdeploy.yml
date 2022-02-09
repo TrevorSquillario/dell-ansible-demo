@@ -1,0 +1,71 @@
+---
+- hosts: mx-chassis
+  connection: local
+  name: IOM and Sled Quick Deploy
+  gather_facts: False
+  vars:
+    ansible_managed: "Created by Ansible on {{ '%Y-%m-%d %H:%M:%S' | strftime }}"
+  vars_files:
+    - vault.yml
+  tasks:     
+    - name: Configure IOM Quick Deploy
+      dellemc.openmanage.ome_device_quick_deploy:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        setting_type: IOMQuickDeploy
+        quick_deploy_options:
+          password: "password"
+          ipv4_enabled: True
+          ipv4_network_type: Static
+          ipv4_subnet_mask: 255.255.255.0
+          ipv4_gateway: 192.168.0.1
+          ipv6_enabled: True
+          ipv6_network_type: Static
+          ipv6_prefix_length: 1
+          ipv6_gateway: "::"
+          slots:
+            - slot_id: 1
+              slot_ipv4_address: 192.168.0.2
+              slot_ipv6_address: "::"
+              vlan_id: 1
+            - slot_id: 2
+              slot_ipv4_address: 192.168.0.3
+              slot_ipv6_address: "::"
+              vlan_id: 2
+    
+    - name: Configure Sled Quick Deploy
+      dellemc.openmanage.ome_device_quick_deploy:
+        hostname: "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        device_service_tag: "{{ service_tag }}"
+        setting_type: ServerQuickDeploy
+        quick_deploy_options:
+          password: "password"
+          ipv4_enabled: True
+          ipv4_network_type: Static
+          ipv4_subnet_mask: 255.255.255.0
+          ipv4_gateway: 192.168.0.1
+          ipv6_enabled: True
+          ipv6_network_type: Static
+          ipv6_prefix_length: 1
+          ipv6_gateway: "::"
+          slots:
+            - slot_id: 1
+              slot_ipv4_address: 192.168.0.1
+              slot_ipv6_address: "::"
+              vlan_id: 1
+            - slot_id: 2
+              slot_ipv4_address: 192.168.0.2
+              slot_ipv6_address: "::"
+              vlan_id: 2
+            - slot_id: 3
+              slot_ipv4_address: 192.168.0.3
+              slot_ipv6_address: "::"
+              vlan_id: 1
+            - slot_id: 4
+              slot_ipv4_address: 192.168.0.4
+              slot_ipv6_address: "::"
+              vlan_id: 2

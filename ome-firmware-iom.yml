@@ -31,15 +31,39 @@
     - debug:
         var: device_servicetags
 
-    - name: Update IOM Firmware # DUP or CLI is the only way to update network IOM. Baseline method not supported.
-      dellemc.openmanage.ome_firmware:
-        hostname: "{{ vault_ome_host }}"
+    - name: Create baseline for devices
+      dellemc.openmanage.ome_firmware_baseline:
+        hostname:  "{{ hostname }}"
         username: "{{ vault_ome_username }}"
         password: "{{ vault_ome_password }}"
-        device_service_tag: "{{ service_tag }}"
-        dup_file: "{{ dup_file_path }}"
+        baseline_name: "{{ baseline_name }}"
+        catalog_name: "{{ catalog_name }}"
+        device_service_tags: "{{ device_servicetags }}"
+      #ignore_errors: true # Fails if object exists https://github.com/dell/dellemc-openmanage-ansible-modules/issues/146
+
+    - name: Wait for baseline creation
+      pause:
+        seconds: 10
+
+    - name: Update firmware for all sleds using baseline
+      dellemc.openmanage.ome_firmware:
+        hostname:  "{{ vault_ome_host }}"
+        username: "{{ vault_ome_username }}"
+        password: "{{ vault_ome_password }}"
+        baseline_name: "{{ baseline_name }}"
       notify: WaitForJob
       register: output
+      #ignore_errors: true # Fails if no updates required https://github.com/dell/dellemc-openmanage-ansible-modules/issues/252
+
+#    - name: Update IOM Firmware # Legacy DUP update method
+#      dellemc.openmanage.ome_firmware:
+#        hostname: "{{ vault_ome_host }}"
+#        username: "{{ vault_ome_username }}"
+#        password: "{{ vault_ome_password }}"
+#        device_service_tag: "{{ service_tag }}"
+#        dup_file: "{{ dup_file_path }}"
+#      notify: WaitForJob
+#      register: output
 
   handlers:
     - name: WaitForJob

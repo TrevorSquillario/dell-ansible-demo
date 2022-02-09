@@ -38,7 +38,7 @@
         baseline_name: "{{ baseline_name }}"
         catalog_name: "{{ catalog_name }}"
         device_service_tags: "{{ device_servicetags }}"
-      ignore_errors: true # Fails if object exists https://github.com/dell/dellemc-openmanage-ansible-modules/issues/146
+      #ignore_errors: true # Fails if object exists https://github.com/dell/dellemc-openmanage-ansible-modules/issues/146
 
     - name: Wait for baseline creation
       pause:
@@ -52,7 +52,7 @@
         baseline_name: "{{ baseline_name }}"
       notify: WaitForJob
       register: output
-      ignore_errors: true # Fails if no updates required https://github.com/dell/dellemc-openmanage-ansible-modules/issues/252
+      #ignore_errors: true # Fails if no updates required https://github.com/dell/dellemc-openmanage-ansible-modules/issues/252
 
   handlers:
     - name: WaitForJob
