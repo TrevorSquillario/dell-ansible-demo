@@ -1,0 +1,44 @@
+---
+- hosts: all
+  connection: local
+  gather_facts: False
+  vars:
+    retries_count: 100
+    polling_interval: 10
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Get All Devices
+    dellemc.openmanage.ome_device_info:
+      hostname: "{{ vault_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      fact_subset: "basic_inventory"
+      validate_certs: False
+      system_query_options:
+        filter: "Type eq 1000"
+    register: out_alldevices
+
+  - debug:
+      msg: "{{ out_alldevices.device_info | json_query('value[].DeviceServiceTag') }}"
+
+  - name: Set Fact
+    set_fact:
+      all_service_tags: "{{ out_alldevices.device_info | json_query('value[].DeviceServiceTag') }}"
+
+  - name: Get Hardware inventory
+    dellemc.openmanage.ome_device_info:
+      hostname: "{{ vault_ome_host }}"
+      username: "{{ vault_ome_username }}"
+      password: "{{ vault_ome_password }}"
+      fact_subset: "detailed_inventory"
+      system_query_options:
+        device_service_tag:
+          - "{{ item }}"
+        inventory_type: "serverArrayDisks"
+      validate_certs: False
+    loop: "{{ all_service_tags }}"
+    register: deviceinfo
+
+  - debug:
+      var: deviceinfo
