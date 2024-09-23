@@ -16,8 +16,9 @@
       fact_subset: "detailed_inventory"
       system_query_options:
         device_service_tag:
-          - C38V9T2
-        inventory_type: "chassisSlotsList"
+          - 859N3L3
+        inventory_type: "serverArrayDisks"
+      validate_certs: False
     register: deviceinfo
 
   - debug:
