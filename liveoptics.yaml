@@ -1,0 +1,40 @@
+- name: Run Live Optics Linux Collector
+  hosts: all
+  become: True
+  vars_files:
+    - vault.yml
+  tasks:
+  - name: Download Linux Collector
+    ansible.builtin.get_url:
+      # Replace with your URL from the LiveOptics site > Download Collector > Linux > Download via direct link
+      url: https://app.liveoptics.com/collector/direct?request=
+      dest: /tmp/liveoptics_x86_64.tar.gz
+
+  - name: Create Directory
+    ansible.builtin.file:
+      path: /tmp/liveoptics
+      state: directory
+      mode: '0755'
+
+  - name: Extract 
+    ansible.builtin.unarchive:
+      src: /tmp/liveoptics_x86_64.tar.gz
+      dest: /tmp/liveoptics
+    args:
+      creates: /tmp/liveoptics/liveoptics
+    
+  # Edit this file and configure DurationHours
+  - name: Write Config File
+    copy: 
+      src: liveoptics.xml
+      dest: /tmp/liveoptics/LiveOptics_Configuration.xml
+
+  - name: Run Live Optics
+    # Use for up to 24 hour collection
+    ansible.builtin.command: ./liveoptics -a -y -n
+    # Use for up to 1 week collection
+    # ansible.builtin.command: ./liveoptics -a -e -y -n
+    async: 604800 # 1 week seconds
+    poll: 0 # Run as background task and do not poll 
+    args:
+      chdir: /tmp/liveoptics

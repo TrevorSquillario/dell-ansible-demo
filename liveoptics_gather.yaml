@@ -1,0 +1,10 @@
+- name: Gather Live Optics Output
+  hosts: all
+  become: True
+  vars_files:
+    - "vault.yml"
+  tasks:
+  - name: Copy Live Optics SIOKIT from remote to local machine
+    ansible.builtin.fetch:
+      src: /tmp/liveoptics/output.siokit
+      dest: "/tmp/{{ inventory_hostname }}.siokit"
