@@ -1,0 +1,74 @@
+---
+- hosts: all
+  connection: local
+  name: Extract TSR and Parse
+  gather_facts: False
+  vars:
+    output_base_dir: /tmp
+  vars_files:
+    - vault.yaml
+  tasks:
+  - name: Set Output Directory Fact
+    ansible.builtin.set_fact:
+      output_dir: "{{ output_base_dir }}/TSR_{{ oob_host }}"
+
+  - debug:
+      var: output_dir
+
+  - name: Create Output Directory
+    ansible.builtin.file:
+      path: "{{ output_dir }}"
+      state: directory
+
+  - name: Export SupportAssist Collection to local path
+    dellemc.openmanage.idrac_support_assist:
+      idrac_ip: "{{ oob_host }}"
+      idrac_user: "{{ vault_oob_username }}"
+      idrac_password: "{{ vault_oob_password }}"
+      validate_certs: False
+      accept_eula: true
+      data_collector: ["debug_logs", "hardware_data", "os_app_data", "storage_logs"]
+      share_parameters:
+        share_name: "{{ output_dir }}"
+        share_type: "local"
+    register: out
+
+  - debug:
+      var: out
+
+  - name: Find TSR Step 1
+    find: 
+      paths: "{{ output_dir }}" 
+      patterns: "*.zip"
+    register: find_result
+
+  - name: Extract TSR Step 1
+    ansible.builtin.unarchive:
+      src: "{{ item.path }}"
+      dest: "{{ output_dir }}" 
+    with_items: "{{ find_result.files }}"
+
+  - name: Find TSR Step 2
+    find: 
+      paths: "{{ output_dir }}" 
+      patterns: "TSR*.zip"
+    register: find_result2
+
+  - name: Extract TSR Step 2
+    ansible.builtin.unarchive:
+      src: "{{ item.path }}"
+      dest: "{{ output_dir }}" 
+    with_items: "{{ find_result2.files }}"
+
+  - name: Replace
+    ansible.builtin.shell: "grep -rlZ {{ oob_host }} {{ output_dir }}/tsr | xargs -0 sed -i 's/{{ oob_host }}/0.0.0.0/g'"
+    register: shell_out
+
+  - debug:
+      var: shell_out
+
+  - name: Create New TSR Zip
+    community.general.archive:
+      path: "{{ output_dir }}/tsr"
+      dest: "{{ output_dir }}/TSR_{{ oob_host }}_scrubbed.zip"
+      format: zip
