@@ -1,0 +1,28 @@
+<SystemConfiguration Model="PowerEdge R660" ServiceTag="6VQS5X3" TimeStamp="Wed Nov  5 06:36:38 2025">
+<Component FQDD="iDRAC.Embedded.1">
+ <Attribute Name="Users.6#UserName">TestTS</Attribute>
+ <Attribute Name="Users.6#Password">P@ssw0rd!</Attribute>
+ <Attribute Name="Users.6#Privilege">1</Attribute>
+ <Attribute Name="Users.6#IpmiLanPrivilege">No Access</Attribute>
+ <Attribute Name="Users.6#IpmiSerialPrivilege">No Access</Attribute>
+ <Attribute Name="Users.6#Enable">Enabled</Attribute>
+ <Attribute Name="Users.6#SolEnable">Disabled</Attribute>
+ <Attribute Name="Users.6#ProtocolEnable">Disabled</Attribute>
+ <Attribute Name="Users.6#AuthenticationProtocol">SHA</Attribute>
+ <Attribute Name="Users.6#PrivacyProtocol">AES</Attribute>
+ <!-- <Attribute Name="Users.6#SSHPublicKey1"></Attribute> -->
+ <!-- <Attribute Name="Users.6#SSHPublicKey2"></Attribute> -->
+ <!-- <Attribute Name="Users.6#SSHPublicKey3"></Attribute> -->
+ <!-- <Attribute Name="Users.6#SSHPublicKey4"></Attribute> -->
+ <Attribute Name="Users.6#Simple2FA">Disabled</Attribute>
+ <Attribute Name="Users.6#UseEmail">Disabled</Attribute>
+ <Attribute Name="Users.6#EmailAddress"></Attribute>
+ <Attribute Name="Users.6#UseSMS">Disabled</Attribute>
+ <Attribute Name="Users.6#SMSNumber"></Attribute>
+ <Attribute Name="Users.6#RSASecurID2FA">Disabled</Attribute>
+ <!-- <Attribute Name="Users.6#SNMPv3AuthenticationPassphrase">******</Attribute> -->
+ <!-- <Attribute Name="Users.6#SNMPv3PrivacyPassphrase">******</Attribute> -->
+ <Attribute Name="Users.6#EnableSNMPv3Passphrase">Disabled</Attribute>
+ <Attribute Name="Users.6#SourceIPTimeout">0</Attribute>
+</Component>
+</SystemConfiguration>

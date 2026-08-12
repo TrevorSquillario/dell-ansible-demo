@@ -26,7 +26,7 @@
       ServerPwr.1.PSRedPolicy: 1
       ServerPwr.1.PSRapidOn: 0
   vars_files:
-    - vault.yml
+    - vault.yaml
   tasks:
   - name: Set BIOS Attributes 
     community.general.redfish_config:

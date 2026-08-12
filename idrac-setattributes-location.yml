@@ -1,0 +1,24 @@
+---
+- name: Set Attributes
+  hosts: all
+  connection: local
+  gather_facts: False
+  vars:
+    system_attributes: 
+      ServerTopology.1.AisleName: "Aisle1"
+      ServerTopology.1.DataCenterName: "DC1"
+      ServerTopology.1.RackName: "Rack 1"
+      ServerTopology.1.RackSlot: "24"
+      ServerTopology.1.RoomName: "DC1-2"
+  vars_files:
+    - vault.yaml
+  tasks:
+  - name: Set System Attributes
+    community.general.idrac_redfish_config:
+      baseuri: "{{ oob_host }}"
+      username: "{{ vault_oob_username }}"
+      password: "{{ vault_oob_password }}"
+      category: Manager
+      command: SetSystemAttributes
+      manager_attributes: "{{ system_attributes }}"
+

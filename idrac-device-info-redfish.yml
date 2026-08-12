@@ -3,7 +3,7 @@
   gather_facts: False
   connection: local
   vars_files:
-    - vault.yml
+    - vault.yaml
   tasks:
     - name: Get manager facts
       community.general.redfish_info: 
@@ -105,7 +105,7 @@
 
     - name: Set iDRAC Fact
       ansible.builtin.set_fact:
-        idrac_attributes: "{{ result.redfish_facts.entries | selectattr('Id', 'equalto', 'iDRACAttributes') | list | first }}"
+        idrac_attributes: "{{ result.redfish_facts.entries | selectattr('Id', 'equalto', 'iDRAC.Embedded.1') | list | first }}"
     
 #    - name: Display all iDRAC attributes
 #      ansible.builtin.debug:
